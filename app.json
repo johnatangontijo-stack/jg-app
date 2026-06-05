@@ -1,0 +1,44 @@
+{
+  "expo": {
+    "name": "JG App",
+    "slug": "jg-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0f0f0f",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "backgroundColor": "#0f0f0f",
+      "resizeMode": "contain"
+    },
+    "ios": {
+      "bundleIdentifier": "com.jonigontijo.jgapp",
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "Use Face ID para entrar mais rápido"
+      }
+    },
+    "android": {
+      "package": "com.jonigontijo.jgapp",
+      "adaptiveIcon": {
+        "backgroundColor": "#0f0f0f",
+        "foregroundImage": "./assets/android-icon-foreground.png"
+      },
+      "permissions": ["USE_BIOMETRIC", "USE_FINGERPRINT", "RECEIVE_BOOT_COMPLETED"]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-notifications",
+      "expo-local-authentication",
+      "expo-secure-store"
+    ],
+    "scheme": "jgapp",
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
