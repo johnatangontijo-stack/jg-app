@@ -8,6 +8,7 @@ import { supabase } from '../../../src/lib/supabase';
 import { useAuthStore } from '../../../src/stores/authStore';
 import { COLORS, SPACING, FONT, RADIUS } from '../../../src/constants/theme';
 import { GoldButton } from '../../../src/components/ui/GoldButton';
+import { DateTimePicker } from '../../../src/components/ui/DateTimePicker';
 import { Database } from '../../../src/types/database';
 
 type Cliente = Pick<Database['public']['Tables']['clientes']['Row'], 'id' | 'nome_fantasia'>;
@@ -31,7 +32,8 @@ export default function AddDemandaScreen() {
     cliente_id: '',
     responsavel_id: profile?.id ?? '',
     prioridade: 'media' as 'baixa' | 'media' | 'alta' | 'urgente',
-    prazo: '',
+    prazoDate: '',
+    prazoTime: '',
     setor: '' as string,
   });
   const [saving, setSaving] = useState(false);
@@ -56,7 +58,7 @@ export default function AddDemandaScreen() {
       cliente_id: form.cliente_id || null,
       responsavel_id: form.responsavel_id || profile?.id || null,
       prioridade: form.prioridade,
-      prazo: form.prazo || null,
+      prazo: form.prazoDate ? `${form.prazoDate}T${form.prazoTime || '00:00'}:00` : null,
       setor: form.setor || null,
       status: 'pendente',
     });
@@ -69,12 +71,17 @@ export default function AddDemandaScreen() {
     <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
       <Text style={styles.title}>Nova Demanda</Text>
 
-      <Field label="Título *" value={form.titulo} onChangeText={v => set('titulo', v)} placeholder="Ex: Criar criativos para campanha..." />
-      <Field label="Descrição" value={form.descricao} onChangeText={v => set('descricao', v)} placeholder="Detalhes da demanda..." multiline />
+      {/* 1. Cliente */}
+      <SelectField
+        label="Cliente"
+        value={form.cliente_id}
+        onSelect={v => set('cliente_id', v)}
+        options={[{ id: '', label: 'Interno (sem cliente)' }, ...clientes.map(c => ({ id: c.id, label: c.nome_fantasia }))]}
+      />
 
-      {/* Setor */}
+      {/* 2. Setor */}
       <View style={styles.fieldWrap}>
-        <Text style={styles.label}>Setor</Text>
+        <Text style={styles.label}>Setor *</Text>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.xs }}>
           {SETORES.map(s => {
             const active = form.setor === s.id;
@@ -92,13 +99,11 @@ export default function AddDemandaScreen() {
         </View>
       </View>
 
-      <SelectField
-        label="Cliente"
-        value={form.cliente_id}
-        onSelect={v => set('cliente_id', v)}
-        options={[{ id: '', label: 'Nenhum (demanda interna)' }, ...clientes.map(c => ({ id: c.id, label: c.nome_fantasia }))]}
-      />
+      {/* 3. Título e descrição */}
+      <Field label="Título *" value={form.titulo} onChangeText={v => set('titulo', v)} placeholder="Ex: Criar criativos para campanha..." />
+      <Field label="Descrição" value={form.descricao} onChangeText={v => set('descricao', v)} placeholder="Detalhes da demanda..." multiline />
 
+      {/* 4. Responsável */}
       <SelectField
         label="Responsável"
         value={form.responsavel_id}
@@ -106,6 +111,7 @@ export default function AddDemandaScreen() {
         options={equipe.map(e => ({ id: e.id, label: e.nome }))}
       />
 
+      {/* 5. Prioridade */}
       <View style={styles.fieldWrap}>
         <Text style={styles.label}>Prioridade</Text>
         <View style={styles.prioRow}>
@@ -123,7 +129,13 @@ export default function AddDemandaScreen() {
         </View>
       </View>
 
-      <Field label="Prazo" value={form.prazo} onChangeText={v => set('prazo', v)} placeholder="AAAA-MM-DD" />
+      <DateTimePicker
+        label="Prazo"
+        date={form.prazoDate}
+        time={form.prazoTime}
+        onDateChange={v => set('prazoDate', v)}
+        onTimeChange={v => set('prazoTime', v)}
+      />
 
       {error && <Text style={styles.error}>{error}</Text>}
       <GoldButton label="Salvar Demanda" onPress={handleSave} loading={saving} style={{ marginTop: SPACING.md }} />

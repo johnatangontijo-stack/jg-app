@@ -31,7 +31,11 @@ yarn-error.*
 *.pem
 
 # local env files
+.env
 .env*.local
+
+# secrets / MCP config (contains service role key)
+.mcp.json
 
 # typescript
 *.tsbuildinfo

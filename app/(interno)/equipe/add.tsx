@@ -8,18 +8,21 @@ import { supabase } from '../../../src/lib/supabase';
 import { COLORS, SPACING, FONT, RADIUS } from '../../../src/constants/theme';
 import { GoldButton } from '../../../src/components/ui/GoldButton';
 
-type Role = 'admin' | 'gerencia' | 'head' | 'financeiro' | 'colaborador';
+type Role = 'admin' | 'gerencia' | 'head' | 'financeiro' | 'social_media' | 'trafego' | 'ia' | 'sites';
 
 const ROLES: { value: Role; label: string; desc: string }[] = [
-  { value: 'admin',       label: 'Admin',       desc: 'Acesso total ao sistema' },
-  { value: 'gerencia',    label: 'Gerência',    desc: 'Clientes, feedbacks, financeiro e equipe' },
-  { value: 'head',        label: 'Head',        desc: 'Demandas, agenda e gravações' },
-  { value: 'financeiro',  label: 'Financeiro',  desc: 'Pagamentos e verbas (restrito)' },
-  { value: 'colaborador', label: 'Colaborador', desc: 'Produções, demandas e agenda' },
+  { value: 'admin',        label: 'Admin',             desc: 'Acesso total ao sistema' },
+  { value: 'gerencia',     label: 'Gerência',          desc: 'Todos os acessos exceto financeiro' },
+  { value: 'head',         label: 'Head',              desc: 'Demandas, feedbacks, agenda e gravações' },
+  { value: 'financeiro',   label: 'Financeiro',        desc: 'Financeiro, feedbacks e NPS (restrito)' },
+  { value: 'social_media', label: 'Social Media',      desc: 'Designer / Videomaker — demandas e agenda' },
+  { value: 'trafego',      label: 'Gestor de Tráfego', desc: 'Tráfego pago — demandas e agenda' },
+  { value: 'ia',           label: 'IA',                desc: 'Inteligência artificial — demandas e agenda' },
+  { value: 'sites',        label: 'Sites',             desc: 'Desenvolvimento web — demandas e agenda' },
 ];
 
 export default function AddEquipeScreen() {
-  const [form, setForm] = useState({ nome: '', email: '', senha: '', role: 'colaborador' as Role });
+  const [form, setForm] = useState({ nome: '', email: '', senha: '', role: 'social_media' as Role });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

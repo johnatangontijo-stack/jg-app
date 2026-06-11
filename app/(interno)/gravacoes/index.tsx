@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
   ScrollView, View, Text, StyleSheet, TouchableOpacity,
-  ActivityIndicator, RefreshControl, Linking, AppState,
+  ActivityIndicator, RefreshControl, AppState,
 } from 'react-native';
 import { router } from 'expo-router';
 import { supabase } from '../../../src/lib/supabase';
@@ -9,7 +9,8 @@ import { COLORS, SPACING, FONT, RADIUS } from '../../../src/constants/theme';
 import { Card } from '../../../src/components/ui/Card';
 import { Database } from '../../../src/types/database';
 
-type Gravacao = Database['public']['Tables']['gravacoes']['Row'] & {
+type Gravacao = Omit<Database['public']['Tables']['gravacoes']['Row'], 'link_gravacao'> & {
+  roteiro: string | null;
   clientes: { nome_fantasia: string } | null;
   profiles: { nome: string } | null;
 };
@@ -41,7 +42,7 @@ export default function GravoesScreen() {
     setLoading(true);
     const { data } = await supabase
       .from('gravacoes')
-      .select('*, clientes(nome_fantasia), profiles!responsavel_id(nome)')
+      .select('id, cliente_id, titulo, descricao, roteiro, google_event_id, data_gravacao, duracao_min, responsavel_id, created_at, clientes(nome_fantasia), profiles!responsavel_id(nome)')
       .order('data_gravacao', { ascending: false })
       .limit(50);
     setGravacoes((data ?? []) as unknown as Gravacao[]);
@@ -124,6 +125,14 @@ export default function GravoesScreen() {
             {g.duracao_min && <Text style={styles.cardMeta}>⏱ {g.duracao_min} min planejados</Text>}
             {g.descricao && <Text style={styles.cardDesc} numberOfLines={2}>{g.descricao}</Text>}
 
+            {/* Roteiro */}
+            {g.roteiro && (
+              <View style={styles.roteiroBox}>
+                <Text style={styles.roteiroLabel}>📋 Roteiro</Text>
+                <Text style={styles.roteiroText} numberOfLines={3}>{g.roteiro}</Text>
+              </View>
+            )}
+
             {/* Timer 1h30 */}
             <View style={styles.timerRow}>
               {!running ? (
@@ -147,16 +156,6 @@ export default function GravoesScreen() {
               )}
             </View>
 
-            {g.link_gravacao ? (
-              <TouchableOpacity
-                style={styles.linkBtn}
-                onPress={() => Linking.openURL(g.link_gravacao!)}
-              >
-                <Text style={styles.linkText}>🎬 Abrir Gravação</Text>
-              </TouchableOpacity>
-            ) : (
-              <Text style={styles.semLink}>Sem link de gravação</Text>
-            )}
           </Card>
         );
       })}
@@ -194,12 +193,9 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.sm, borderWidth: 1, borderColor: COLORS.danger,
   },
   timerStopText: { color: COLORS.danger, fontSize: 12 },
-  linkBtn: {
-    marginTop: SPACING.sm, padding: SPACING.sm, borderRadius: RADIUS.md,
-    borderWidth: 1, borderColor: COLORS.gold, alignItems: 'center',
-  },
-  linkText: { color: COLORS.gold, fontSize: 13, ...FONT.medium },
-  semLink: { color: COLORS.text3, fontSize: 12, marginTop: SPACING.xs },
+  roteiroBox: { backgroundColor: COLORS.surface3, borderRadius: RADIUS.sm, padding: SPACING.sm, gap: 4, borderLeftWidth: 2, borderLeftColor: COLORS.gold },
+  roteiroLabel: { color: COLORS.gold, fontSize: 11, ...FONT.medium },
+  roteiroText: { color: COLORS.text2, fontSize: 12, lineHeight: 17 },
   empty: { color: COLORS.text2, textAlign: 'center', marginBottom: SPACING.sm },
   emptyAction: { color: COLORS.gold, textAlign: 'center', ...FONT.medium },
 });

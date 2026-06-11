@@ -14,6 +14,8 @@ export default function AddClienteScreen() {
     razao_social: '',
     cnpj: '',
     segmento: '',
+    nicho: '',
+    ramo: '',
     mensalidade: '',
     data_inicio: new Date().toISOString().slice(0, 10),
     data_renovacao: '',
@@ -43,6 +45,8 @@ export default function AddClienteScreen() {
       razao_social: form.razao_social.trim() || null,
       cnpj: form.cnpj.trim() || null,
       segmento: form.segmento.trim() || null,
+      nicho: form.nicho.trim() || null,
+      ramo: form.ramo.trim() || null,
       mensalidade,
       data_inicio: form.data_inicio,
       data_renovacao: dataRenovacao,
@@ -64,6 +68,8 @@ export default function AddClienteScreen() {
       <Field label="Razão Social" value={form.razao_social} onChangeText={v => set('razao_social', v)} placeholder="Ex: TechBrasil Comercio Ltda" />
       <Field label="CNPJ" value={form.cnpj} onChangeText={v => set('cnpj', v)} placeholder="00.000.000/0001-00" keyboardType="numeric" />
       <Field label="Segmento" value={form.segmento} onChangeText={v => set('segmento', v)} placeholder="Ex: E-commerce, Saúde..." />
+      <Field label="Nicho (para Networking)" value={form.nicho} onChangeText={v => set('nicho', v)} placeholder="Ex: Automotivo, Moda, Saúde..." />
+      <Field label="Ramo de Atuação" value={form.ramo} onChangeText={v => set('ramo', v)} placeholder="Ex: Concessionária, Boutique, Clínica..." />
       <Field label="Mensalidade (R$) *" value={form.mensalidade} onChangeText={v => set('mensalidade', v)} placeholder="2500,00" keyboardType="decimal-pad" />
       <Field label="Data de Início" value={form.data_inicio} onChangeText={v => set('data_inicio', v)} placeholder="AAAA-MM-DD" />
       <Field label="Data de Renovação" value={form.data_renovacao} onChangeText={v => set('data_renovacao', v)} placeholder="AAAA-MM-DD (auto: +1 ano)" />

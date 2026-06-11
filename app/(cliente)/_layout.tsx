@@ -81,6 +81,20 @@ export default function ClienteLayout() {
         }}
       />
       <Tabs.Screen
+        name="aprovacoes"
+        options={{
+          title: 'Aprovações',
+          tabBarIcon: ({ focused }) => <TabIcon emoji="✅" focused={focused} />,
+        }}
+      />
+      <Tabs.Screen
+        name="networking"
+        options={{
+          title: 'Networking',
+          tabBarIcon: ({ focused }) => <TabIcon emoji="🤝" focused={focused} />,
+        }}
+      />
+      <Tabs.Screen
         name="marca"
         options={{
           title: 'Marca',

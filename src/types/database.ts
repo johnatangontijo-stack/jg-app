@@ -8,7 +8,7 @@ export type Database = {
           id: string
           nome: string
           email: string
-          role: 'admin' | 'gerencia' | 'head' | 'financeiro' | 'colaborador' | 'cliente'
+          role: 'admin' | 'gerencia' | 'head' | 'financeiro' | 'social_media' | 'trafego' | 'ia' | 'sites' | 'cliente'
           avatar_url: string | null
           ativo: boolean
           created_at: string
@@ -18,7 +18,7 @@ export type Database = {
           id: string
           nome: string
           email: string
-          role?: 'admin' | 'gerencia' | 'head' | 'financeiro' | 'colaborador' | 'cliente'
+          role?: 'admin' | 'gerencia' | 'head' | 'financeiro' | 'social_media' | 'trafego' | 'ia' | 'sites' | 'cliente'
           avatar_url?: string | null
           ativo?: boolean
           created_at?: string
@@ -28,7 +28,7 @@ export type Database = {
           id?: string
           nome?: string
           email?: string
-          role?: 'admin' | 'gerencia' | 'head' | 'financeiro' | 'colaborador' | 'cliente'
+          role?: 'admin' | 'gerencia' | 'head' | 'financeiro' | 'social_media' | 'trafego' | 'ia' | 'sites' | 'cliente'
           avatar_url?: string | null
           ativo?: boolean
           created_at?: string
@@ -42,7 +42,7 @@ export type Database = {
           cliente_id: string | null
           titulo: string
           descricao: string | null
-          link_gravacao: string | null
+          roteiro: string | null
           google_event_id: string | null
           data_gravacao: string
           duracao_min: number | null
@@ -54,7 +54,7 @@ export type Database = {
           cliente_id?: string | null
           titulo: string
           descricao?: string | null
-          link_gravacao?: string | null
+          roteiro?: string | null
           google_event_id?: string | null
           data_gravacao?: string
           duracao_min?: number | null
@@ -66,11 +66,91 @@ export type Database = {
           cliente_id?: string | null
           titulo?: string
           descricao?: string | null
-          link_gravacao?: string | null
+          roteiro?: string | null
           google_event_id?: string | null
           data_gravacao?: string
           duracao_min?: number | null
           responsavel_id?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      aprovacoes: {
+        Row: {
+          id: string
+          aprovacao_id: string
+          cliente_id: string | null
+          cliente_nome: string | null
+          social_media_responsavel: string | null
+          tipo_conteudo: string
+          plataforma: string
+          data_publicacao_prevista: string | null
+          descricao_post: string | null
+          conteudo: Record<string, unknown> | null
+          legenda_sugerida: string | null
+          observacoes_internas: string | null
+          prazo_resposta: string | null
+          callback_url: string | null
+          callback_token: string | null
+          status: 'aguardando_aprovacao' | 'aprovado' | 'reprovado' | 'revisao'
+          resposta_comentario: string | null
+          respondido_em: string | null
+          respondido_por: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          aprovacao_id: string
+          cliente_id?: string | null
+          cliente_nome?: string | null
+          social_media_responsavel?: string | null
+          tipo_conteudo: string
+          plataforma: string
+          data_publicacao_prevista?: string | null
+          descricao_post?: string | null
+          conteudo?: Record<string, unknown> | null
+          legenda_sugerida?: string | null
+          observacoes_internas?: string | null
+          prazo_resposta?: string | null
+          callback_url?: string | null
+          callback_token?: string | null
+          status?: 'aguardando_aprovacao' | 'aprovado' | 'reprovado' | 'revisao'
+          resposta_comentario?: string | null
+          respondido_em?: string | null
+          respondido_por?: string | null
+          created_at?: string
+        }
+        Update: {
+          status?: 'aguardando_aprovacao' | 'aprovado' | 'reprovado' | 'revisao'
+          resposta_comentario?: string | null
+          respondido_em?: string | null
+          respondido_por?: string | null
+        }
+        Relationships: []
+      }
+      faturamento_diario: {
+        Row: {
+          id: string
+          cliente_id: string
+          data: string
+          valor: number
+          observacao: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          cliente_id: string
+          data: string
+          valor: number
+          observacao?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          cliente_id?: string
+          data?: string
+          valor?: number
+          observacao?: string | null
           created_at?: string
         }
         Relationships: []
@@ -612,6 +692,7 @@ export type Database = {
           respondido: boolean
           resposta: string | null
           respondido_em: string | null
+          designado_para_id: string | null
           created_at: string
         }
         Insert: {
@@ -622,6 +703,7 @@ export type Database = {
           respondido?: boolean
           resposta?: string | null
           respondido_em?: string | null
+          designado_para_id?: string | null
           created_at?: string
         }
         Update: {
@@ -632,6 +714,7 @@ export type Database = {
           respondido?: boolean
           resposta?: string | null
           respondido_em?: string | null
+          designado_para_id?: string | null
           created_at?: string
         }
         Relationships: []

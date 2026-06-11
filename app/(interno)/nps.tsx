@@ -5,8 +5,8 @@ import {
 } from 'react-native';
 import { COLORS, SPACING, FONT, RADIUS } from '../../src/constants/theme';
 import { supabase } from '../../src/lib/supabase';
+import { useAuthStore } from '../../src/stores/authStore';
 import { Card } from '../../src/components/ui/Card';
-import { Badge } from '../../src/components/ui/Badge';
 
 interface VotoComInfo {
   nota: number;
@@ -30,7 +30,6 @@ interface NPSData {
   pesquisaId: string | null;
 }
 
-// NPS = (promotores - detratores) / total × 100
 const calcNPS = (votos: { nota: number }[]) => {
   if (!votos.length) return 0;
   const p = votos.filter(v => v.nota >= 9).length;
@@ -38,77 +37,71 @@ const calcNPS = (votos: { nota: number }[]) => {
   return Math.round(((p - d) / votos.length) * 100);
 };
 
+const buildNPS = (votos: VotoComInfo[], pesquisaId: string | null): NPSData => {
+  const total = votos.length;
+  const promotores = votos.filter(x => x.nota >= 9).length;
+  const neutros = votos.filter(x => x.nota >= 7 && x.nota <= 8).length;
+  const detratores = votos.filter(x => x.nota <= 6).length;
+  return {
+    score: calcNPS(votos),
+    promotores, neutros, detratores,
+    pctPromo: total ? Math.round((promotores / total) * 100) : 0,
+    pctNeutro: total ? Math.round((neutros / total) * 100) : 0,
+    pctDetrat: total ? Math.round((detratores / total) * 100) : 0,
+    total, votos, pesquisaId,
+  };
+};
+
 const npsColor = (score: number) =>
   score >= 75 ? COLORS.success : score >= 50 ? COLORS.gold : score >= 0 ? COLORS.warning : COLORS.danger;
-
 const notaColor = (nota: number) =>
   nota >= 9 ? COLORS.success : nota >= 7 ? COLORS.warning : COLORS.danger;
-
 const notaLabel = (nota: number) =>
   nota >= 9 ? 'Promotor' : nota >= 7 ? 'Neutro' : 'Detrator';
 
-export default function NPSInternoScreen() {
-  const [data, setData] = useState<NPSData | null>(null);
+type FiltroVoto = 'todos' | 'promotores' | 'neutros' | 'detratores';
+
+const ROLES_ADMIN = ['admin', 'gerencia'];
+
+export default function NPSScreen() {
+  const { profile } = useAuthStore();
+  const isAdmin = ROLES_ADMIN.includes(profile?.role ?? '');
+
+  const [npsData, setNpsData] = useState<NPSData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [filtro, setFiltro] = useState<'todos' | 'promotores' | 'neutros' | 'detratores'>('todos');
+  const [filtro, setFiltro] = useState<FiltroVoto>('todos');
 
   const load = useCallback(async () => {
     setLoading(true);
 
-    // Busca pesquisa ativa
     const { data: pesquisa } = await supabase
-      .from('nps_pesquisas')
-      .select('id')
-      .eq('ativo', true)
-      .maybeSingle();
+      .from('nps_pesquisas').select('id').eq('ativo', true).maybeSingle();
 
     if (!pesquisa) {
-      setData({ score: 0, promotores: 0, neutros: 0, detratores: 0, pctPromo: 0, pctNeutro: 0, pctDetrat: 0, total: 0, votos: [], pesquisaId: null });
+      setNpsData(buildNPS([], null));
       setLoading(false);
       return;
     }
 
-    const { data: votos } = await supabase
+    const { data: todoVotos } = await supabase
       .from('nps_votos')
       .select('nota, comentario, cliente_id, funcionario_id, clientes(nome_fantasia), profiles!funcionario_id(nome)')
       .eq('pesquisa_id', pesquisa.id)
       .order('created_at', { ascending: false });
 
-    const v = (votos ?? []) as unknown as VotoComInfo[];
-    const total = v.length;
-    const promotores = v.filter(x => x.nota >= 9).length;
-    const neutros = v.filter(x => x.nota >= 7 && x.nota <= 8).length;
-    const detratores = v.filter(x => x.nota <= 6).length;
-
-    setData({
-      score: calcNPS(v),
-      promotores, neutros, detratores,
-      pctPromo: total ? Math.round((promotores / total) * 100) : 0,
-      pctNeutro: total ? Math.round((neutros / total) * 100) : 0,
-      pctDetrat: total ? Math.round((detratores / total) * 100) : 0,
-      total,
-      votos: v,
-      pesquisaId: pesquisa.id,
-    });
+    const todos = (todoVotos ?? []) as unknown as VotoComInfo[];
+    setNpsData(buildNPS(todos, pesquisa.id));
     setLoading(false);
   }, []);
 
   useEffect(() => {
     load();
-    // Realtime — atualiza ao vivo
     const channel = supabase
       .channel('nps-realtime')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'nps_votos' }, () => load())
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [load]);
-
-  const votosFiltrados = data?.votos.filter(v => {
-    if (filtro === 'promotores') return v.nota >= 9;
-    if (filtro === 'neutros') return v.nota >= 7 && v.nota <= 8;
-    if (filtro === 'detratores') return v.nota <= 6;
-    return true;
-  }) ?? [];
 
   const criarPesquisa = async () => {
     const mes = new Date().toISOString().slice(0, 7);
@@ -117,31 +110,43 @@ export default function NPSInternoScreen() {
     load();
   };
 
+  const data = npsData;
+
+  const votosFiltrados = data?.votos.filter(v => {
+    if (filtro === 'promotores') return v.nota >= 9;
+    if (filtro === 'neutros') return v.nota >= 7 && v.nota <= 8;
+    if (filtro === 'detratores') return v.nota <= 6;
+    return true;
+  }) ?? [];
+
   if (loading) return <View style={s.center}><ActivityIndicator color={COLORS.gold} /></View>;
 
   return (
     <ScrollView style={s.container} contentContainerStyle={s.content}
       refreshControl={<RefreshControl refreshing={loading} onRefresh={load} tintColor={COLORS.gold} />}>
 
-      <Text style={s.title}>NPS</Text>
+      <Text style={s.title}>NPS da Empresa</Text>
 
       {!data?.pesquisaId ? (
         <Card>
           <Text style={s.semPesq}>Nenhuma pesquisa NPS ativa.</Text>
-          <TouchableOpacity style={s.criarBtn} onPress={criarPesquisa}>
-            <Text style={s.criarBtnText}>+ Criar pesquisa para este mês</Text>
-          </TouchableOpacity>
+          {isAdmin && (
+            <TouchableOpacity style={s.criarBtn} onPress={criarPesquisa}>
+              <Text style={s.criarBtnText}>+ Criar pesquisa para este mês</Text>
+            </TouchableOpacity>
+          )}
         </Card>
       ) : (
         <>
-          {/* Score principal */}
           <View style={s.scoreCard}>
             <View style={s.scoreCircle}>
               <Text style={[s.scoreNum, { color: npsColor(data!.score) }]}>{data!.score}</Text>
               <Text style={s.scoreLabel}>NPS</Text>
             </View>
             <View style={s.scoreInfo}>
-              <Text style={s.scoreTotal}>{data!.total} voto{data!.total !== 1 ? 's' : ''}</Text>
+              <Text style={s.scoreTotal}>
+                {data!.total} voto{data!.total !== 1 ? 's' : ''} · empresa
+              </Text>
               <View style={s.barra}>
                 <View style={[s.barSeg, { flex: data!.pctPromo || 1, backgroundColor: COLORS.success }]} />
                 <View style={[s.barSeg, { flex: data!.pctNeutro || 0.5, backgroundColor: COLORS.warning }]} />
@@ -153,12 +158,11 @@ export default function NPSInternoScreen() {
                 <LegItem cor={COLORS.danger} label="Detratores" pct={data!.pctDetrat} count={data!.detratores} />
               </View>
               <Text style={s.formula}>
-                Fórmula: ({data!.promotores} prom − {data!.detratores} detr) ÷ {data!.total} × 100 = {data!.score}
+                ({data!.promotores} − {data!.detratores}) ÷ {data!.total} × 100 = {data!.score}
               </Text>
             </View>
           </View>
 
-          {/* Filtros */}
           <View style={s.filtros}>
             {([
               { k: 'todos', l: 'Todos' },
@@ -172,7 +176,6 @@ export default function NPSInternoScreen() {
             ))}
           </View>
 
-          {/* Lista de votos */}
           {votosFiltrados.length === 0 && (
             <Card><Text style={s.empty}>Nenhum voto nesta categoria.</Text></Card>
           )}
@@ -211,6 +214,11 @@ const s = StyleSheet.create({
   content: { padding: SPACING.lg, gap: SPACING.md, paddingBottom: 48 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: COLORS.black },
   title: { color: COLORS.text, fontSize: 22, ...FONT.bold },
+  abaRow: { flexDirection: 'row', gap: SPACING.sm },
+  abaBtn: { flex: 1, paddingVertical: SPACING.sm, borderRadius: RADIUS.full, borderWidth: 1, borderColor: COLORS.border, alignItems: 'center' },
+  abaBtnActive: { borderColor: COLORS.gold, backgroundColor: 'rgba(201,168,76,0.12)' },
+  abaText: { color: COLORS.text3, fontSize: 12 },
+  abaTextActive: { color: COLORS.gold, ...FONT.medium },
   scoreCard: { backgroundColor: COLORS.surface1, borderRadius: RADIUS.lg, padding: SPACING.lg, borderWidth: 1, borderColor: COLORS.border, flexDirection: 'row', gap: SPACING.lg, alignItems: 'flex-start' },
   scoreCircle: { width: 80, height: 80, borderRadius: RADIUS.full, borderWidth: 3, borderColor: COLORS.gold, alignItems: 'center', justifyContent: 'center' },
   scoreNum: { fontSize: 26, ...FONT.bold },
@@ -220,7 +228,7 @@ const s = StyleSheet.create({
   barra: { flexDirection: 'row', height: 6, borderRadius: 3, overflow: 'hidden', gap: 1 },
   barSeg: { borderRadius: 3 },
   legendRow: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.sm },
-  formula: { color: COLORS.text3, fontSize: 10, fontStyle: 'italic', marginTop: SPACING.xs },
+  formula: { color: COLORS.text3, fontSize: 10, fontStyle: 'italic' },
   filtros: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.xs },
   filtroBtn: { paddingHorizontal: SPACING.md, paddingVertical: SPACING.sm, borderRadius: RADIUS.full, borderWidth: 1, borderColor: COLORS.border },
   filtroBtnActive: { borderColor: COLORS.gold, backgroundColor: 'rgba(201,168,76,0.12)' },

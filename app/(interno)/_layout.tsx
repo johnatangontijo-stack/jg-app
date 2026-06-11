@@ -5,9 +5,15 @@ import { COLORS, FONT } from '../../src/constants/theme';
 import { useAuthStore } from '../../src/stores/authStore';
 import { useNotificacoesStore } from '../../src/stores/notificacoesStore';
 
-type Role = 'admin' | 'gerencia' | 'head' | 'financeiro' | 'colaborador' | 'cliente';
+export type Role =
+  | 'admin' | 'gerencia' | 'head' | 'financeiro'
+  | 'social_media' | 'trafego' | 'ia' | 'sites'
+  | 'cliente';
 
-function can(role: Role | undefined, allowed: Role[]): boolean {
+// Roles operacionais (antigo colaborador)
+export const ROLES_OPERACIONAL: Role[] = ['social_media', 'trafego', 'ia', 'sites'];
+
+export function can(role: Role | undefined, allowed: Role[]): boolean {
   if (!role) return false;
   return allowed.includes(role);
 }
@@ -21,13 +27,23 @@ export default function InternoLayout() {
   const { load, subscribeRealtime } = useNotificacoesStore();
   const role = profile?.role as Role | undefined;
 
-  const showClientes   = can(role, ['admin', 'gerencia']);
-  const showDemandas   = can(role, ['admin', 'gerencia', 'head', 'colaborador']);
-  const showNps        = can(role, ['admin', 'gerencia']);
-  const showFeedbacks  = can(role, ['admin', 'gerencia']);
+  // admin: tudo
+  // gerencia: tudo exceto financeiro
+  // head: demandas, feedbacks, agenda, gravações, nps, clientes (todos)
+  // financeiro: financeiro, feedbacks, nps
+  // operacional: demandas, agenda, gravações, nps, clientes (só seus)
+  const isOperacional = can(role, ROLES_OPERACIONAL);
+
+  const showClientes   = can(role, ['admin', 'gerencia', 'head', ...ROLES_OPERACIONAL]);
+  const showDemandas   = can(role, ['admin', 'gerencia', 'head', ...ROLES_OPERACIONAL]);
+  const showNps        = true; // todos veem NPS
+  const showFeedbacks  = can(role, ['admin', 'gerencia', 'head', 'financeiro']);
   const showFinanceiro = can(role, ['admin', 'financeiro']);
-  const showGravacoes  = can(role, ['admin', 'gerencia', 'head']);
+  const showGravacoes  = can(role, ['admin', 'gerencia', 'head', ...ROLES_OPERACIONAL]);
   const showEquipe     = can(role, ['admin', 'gerencia']);
+  const showMetas      = can(role, ['admin', 'gerencia', 'head', ...ROLES_OPERACIONAL]);
+  const showAprovacoes = can(role, ['admin', 'gerencia', 'head', 'social_media']);
+  const showNetworking = can(role, ['admin', 'gerencia', 'head']);
 
   useEffect(() => {
     if (!profile) return;
@@ -112,6 +128,30 @@ export default function InternoLayout() {
           title: 'Financeiro',
           href: showFinanceiro ? undefined : null,
           tabBarIcon: ({ focused }) => <TabIcon emoji="💰" focused={focused} />,
+        }}
+      />
+      <Tabs.Screen
+        name="aprovacoes"
+        options={{
+          title: 'Aprovações',
+          href: showAprovacoes ? undefined : null,
+          tabBarIcon: ({ focused }) => <TabIcon emoji="✅" focused={focused} />,
+        }}
+      />
+      <Tabs.Screen
+        name="metas"
+        options={{
+          title: 'Metas',
+          href: showMetas ? undefined : null,
+          tabBarIcon: ({ focused }) => <TabIcon emoji="🎯" focused={focused} />,
+        }}
+      />
+      <Tabs.Screen
+        name="networking"
+        options={{
+          title: 'Networking',
+          href: showNetworking ? undefined : null,
+          tabBarIcon: ({ focused }) => <TabIcon emoji="🤝" focused={focused} />,
         }}
       />
       <Tabs.Screen

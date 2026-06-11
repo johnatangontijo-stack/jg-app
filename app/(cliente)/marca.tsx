@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   ScrollView, View, Text, TextInput, TouchableOpacity,
-  StyleSheet, ActivityIndicator, Modal, RefreshControl,
+  StyleSheet, ActivityIndicator, RefreshControl,
 } from 'react-native';
 import { COLORS, SPACING, FONT, RADIUS } from '../../src/constants/theme';
 import { useAuthStore } from '../../src/stores/authStore';
@@ -10,6 +10,7 @@ import { Card } from '../../src/components/ui/Card';
 import { Badge } from '../../src/components/ui/Badge';
 import { GoldButton } from '../../src/components/ui/GoldButton';
 import { Database } from '../../src/types/database';
+import { AudioTranscriber } from '../../src/components/ui/AudioTranscriber';
 
 type ClienteDNA = Database['public']['Tables']['cliente_dna']['Row'];
 type ClienteAtivo = Database['public']['Tables']['cliente_ativos']['Row'];
@@ -21,6 +22,7 @@ export default function MarcaScreen() {
   const [loading, setLoading] = useState(true);
   const [editModal, setEditModal] = useState(false);
   const [form, setForm] = useState({ descricao: '', diferencial: '' });
+  const [campoAudio, setCampoAudio] = useState<'descricao' | 'diferencial'>('descricao');
   const [saving, setSaving] = useState(false);
 
   const load = async () => {
@@ -61,7 +63,7 @@ export default function MarcaScreen() {
   const TIPO_ICONS: Record<string, string> = { logo: '🎨', paleta: '🖌', fotos: '📸', videos: '🎬' };
 
   return (
-    <>
+    <View style={{ flex: 1 }}>
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.content}
@@ -136,40 +138,78 @@ export default function MarcaScreen() {
         </Card>
       </ScrollView>
 
-      <Modal visible={editModal} transparent animationType="slide" onRequestClose={() => setEditModal(false)}>
-        <View style={styles.overlay}>
-          <View style={styles.sheet}>
-            <Text style={styles.modalTitle}>Editar informações</Text>
-            <Text style={styles.inputLabel}>Descrição</Text>
-            <TextInput
-              style={styles.textInput}
-              value={form.descricao}
-              onChangeText={(v) => setForm((f) => ({ ...f, descricao: v }))}
-              placeholder="Quem é sua empresa..."
-              placeholderTextColor={COLORS.text3}
-              multiline
-              numberOfLines={3}
-              textAlignVertical="top"
-            />
-            <Text style={styles.inputLabel}>Diferencial</Text>
-            <TextInput
-              style={styles.textInput}
-              value={form.diferencial}
-              onChangeText={(v) => setForm((f) => ({ ...f, diferencial: v }))}
-              placeholder="O que te diferencia..."
-              placeholderTextColor={COLORS.text3}
-              multiline
-              numberOfLines={3}
-              textAlignVertical="top"
-            />
-            <View style={styles.modalActions}>
-              <GoldButton label="Cancelar" onPress={() => setEditModal(false)} variant="ghost" style={styles.flex} />
-              <GoldButton label="Salvar" onPress={salvarEdit} loading={saving} style={styles.flex} />
-            </View>
-          </View>
-        </View>
-      </Modal>
-    </>
+      {editModal && (
+        <TouchableOpacity style={styles.overlay} activeOpacity={1} onPress={() => setEditModal(false)}>
+          <TouchableOpacity activeOpacity={1} onPress={e => e.stopPropagation?.()}>
+          <ScrollView
+            style={styles.sheetScroll}
+            contentContainerStyle={styles.sheet}
+            keyboardShouldPersistTaps="handled"
+          >
+              <Text style={styles.modalTitle}>Editar informações</Text>
+
+              {/* Gravação de áudio */}
+              <View style={styles.audioSection}>
+                <Text style={styles.audioLabel}>🎙 Fale sobre sua empresa</Text>
+                <Text style={styles.audioSub}>Selecione o campo e clique em Gravar — o texto aparece automaticamente.</Text>
+
+                {/* Selector de campo */}
+                <View style={styles.campoRow}>
+                  {(['descricao', 'diferencial'] as const).map(c => (
+                    <TouchableOpacity
+                      key={c}
+                      style={[styles.campoBtn, campoAudio === c && styles.campoBtnActive]}
+                      onPress={() => setCampoAudio(c)}
+                    >
+                      <Text style={[styles.campoBtnText, campoAudio === c && styles.campoBtnTextActive]}>
+                        {c === 'descricao' ? 'Descrição' : 'Diferencial'}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                <AudioTranscriber
+                  currentText={form[campoAudio]}
+                  onTranscript={(text) => setForm(f => ({ ...f, [campoAudio]: text }))}
+                />
+              </View>
+
+              {/* Campos de texto editáveis */}
+              <Text style={styles.inputLabel}>Descrição</Text>
+              <Text style={styles.editHint}>Você pode editar ou corrigir o texto abaixo:</Text>
+              <TextInput
+                style={styles.textInput}
+                value={form.descricao}
+                onChangeText={(v) => setForm((f) => ({ ...f, descricao: v }))}
+                placeholder="Quem é sua empresa..."
+                placeholderTextColor={COLORS.text3}
+                multiline
+                numberOfLines={4}
+                textAlignVertical="top"
+              />
+
+              <Text style={styles.inputLabel}>Diferencial</Text>
+              <Text style={styles.editHint}>Você pode editar ou corrigir o texto abaixo:</Text>
+              <TextInput
+                style={styles.textInput}
+                value={form.diferencial}
+                onChangeText={(v) => setForm((f) => ({ ...f, diferencial: v }))}
+                placeholder="O que te diferencia..."
+                placeholderTextColor={COLORS.text3}
+                multiline
+                numberOfLines={4}
+                textAlignVertical="top"
+              />
+
+              <View style={styles.modalActions}>
+                <GoldButton label="Cancelar" onPress={() => setEditModal(false)} variant="ghost" style={styles.flex} />
+                <GoldButton label="Salvar" onPress={salvarEdit} loading={saving} style={styles.flex} />
+              </View>
+          </ScrollView>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      )}
+    </View>
   );
 }
 
@@ -189,11 +229,21 @@ const styles = StyleSheet.create({
   ativoIcon: { fontSize: 28 },
   ativoLabel: { color: COLORS.text, fontSize: 13, ...FONT.medium },
   ativoAdd: { color: COLORS.gold, fontSize: 11 },
-  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' },
-  sheet: { backgroundColor: COLORS.surface2, borderTopLeftRadius: RADIUS.xl, borderTopRightRadius: RADIUS.xl, padding: SPACING.xxl, gap: SPACING.md },
+  overlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.75)', justifyContent: 'flex-end', zIndex: 999 },
+  sheetScroll: { maxHeight: 640, backgroundColor: COLORS.surface2, borderTopLeftRadius: RADIUS.xl, borderTopRightRadius: RADIUS.xl },
+  sheet: { padding: SPACING.xxl, gap: SPACING.md, paddingBottom: 48 },
   modalTitle: { color: COLORS.text, fontSize: 18, ...FONT.bold },
-  inputLabel: { color: COLORS.text3, fontSize: 12 },
-  textInput: { backgroundColor: COLORS.surface3, borderRadius: RADIUS.md, borderWidth: 1, borderColor: COLORS.borderWeak, padding: SPACING.md, color: COLORS.text, fontSize: 14, minHeight: 80 },
-  modalActions: { flexDirection: 'row', gap: SPACING.sm },
+  inputLabel: { color: COLORS.text2, fontSize: 12, ...FONT.medium, marginTop: SPACING.xs },
+  editHint: { color: COLORS.text3, fontSize: 11, marginBottom: 4 },
+  textInput: { backgroundColor: COLORS.surface3, borderRadius: RADIUS.md, borderWidth: 1, borderColor: COLORS.borderWeak, padding: SPACING.md, color: COLORS.text, fontSize: 14, minHeight: 90 },
+  modalActions: { flexDirection: 'row', gap: SPACING.sm, marginTop: SPACING.sm },
   flex: { flex: 1 },
+  audioSection: { backgroundColor: COLORS.surface1, borderRadius: RADIUS.lg, padding: SPACING.md, gap: SPACING.sm, borderWidth: 1, borderColor: 'rgba(201,168,76,0.2)' },
+  audioLabel: { color: COLORS.text, fontSize: 14, ...FONT.bold },
+  audioSub: { color: COLORS.text3, fontSize: 12, lineHeight: 16 },
+  campoRow: { flexDirection: 'row', gap: SPACING.sm },
+  campoBtn: { flex: 1, paddingVertical: SPACING.sm, borderRadius: RADIUS.md, borderWidth: 1, borderColor: COLORS.border, alignItems: 'center' },
+  campoBtnActive: { borderColor: COLORS.gold, backgroundColor: 'rgba(201,168,76,0.1)' },
+  campoBtnText: { color: COLORS.text3, fontSize: 12 },
+  campoBtnTextActive: { color: COLORS.gold, ...FONT.medium },
 });

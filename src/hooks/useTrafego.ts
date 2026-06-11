@@ -17,7 +17,7 @@ export function useTrafego() {
   const mesAtual = new Date().toISOString().slice(0, 7);
 
   const load = useCallback(async () => {
-    if (!clienteId) return;
+    if (!clienteId) { setLoading(false); return; }
     setLoading(true);
     setError(null);
 
@@ -44,26 +44,7 @@ export function useTrafego() {
 
   useEffect(() => {
     load();
-
-    if (!clienteId) return;
-    const channel = supabase
-      .channel('trafego-realtime')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'trafego_snapshots',
-          filter: `cliente_id=eq.${clienteId}`,
-        },
-        () => load()
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [clienteId, load]);
+  }, [load]);
 
   const metaSnap = snapshots.find((s) => s.plataforma === 'meta');
   const googleSnap = snapshots.find((s) => s.plataforma === 'google');
