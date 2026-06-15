@@ -98,7 +98,7 @@ export default function NPSScreen() {
   useEffect(() => {
     load();
     const channel = supabase
-      .channel('nps-realtime')
+      .channel(`nps-rt-${Math.random().toString(36).slice(2)}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'nps_votos' }, () => load())
       .subscribe();
     return () => { supabase.removeChannel(channel); };

@@ -58,7 +58,7 @@ export const useNotificacoesStore = create<NotificacoesState>((set, get) => ({
 
   subscribeRealtime: (profileId) => {
     const channel = supabase
-      .channel('notificacoes-realtime')
+      .channel(`notificacoes-rt-${Math.random().toString(36).slice(2)}`)
       .on(
         'postgres_changes',
         {

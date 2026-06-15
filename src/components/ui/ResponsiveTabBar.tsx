@@ -82,7 +82,7 @@ export function ResponsiveTabBar({ state, navigation, menu }: Props) {
               <Icon name="back" size={24} color={COLORS.text} />
             </TouchableOpacity>
           </View>
-          <MoreMenu items={secondary} onNavigate={() => setMoreOpen(false)} />
+          <MoreMenu items={secondary} onNavigate={() => setMoreOpen(false)} bottomInset={insets.bottom} />
         </View>
       </Modal>
     </>

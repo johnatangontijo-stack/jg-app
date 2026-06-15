@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS, RADIUS, SPACING, FONT } from '../../constants/theme';
 import { Icon } from './Icon';
 import { useResponsive } from '../../hooks/useResponsive';
@@ -11,12 +10,13 @@ interface MoreMenuProps {
   items: NavItem[];
   /** chamado após navegar — usado p/ fechar o modal "Mais". */
   onNavigate?: () => void;
+  /** inset inferior (passado pelo pai; useSafeAreaInsets não funciona dentro de Modal). */
+  bottomInset?: number;
 }
 
 /** Grid responsivo usado pela aba "Mais" (interno e cliente). */
-export function MoreMenu({ items, onNavigate }: MoreMenuProps) {
+export function MoreMenu({ items, onNavigate, bottomInset = 0 }: MoreMenuProps) {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const { columns, contentMaxWidth } = useResponsive();
 
   return (
@@ -24,7 +24,7 @@ export function MoreMenu({ items, onNavigate }: MoreMenuProps) {
       style={styles.container}
       contentContainerStyle={[
         styles.content,
-        { paddingBottom: insets.bottom + SPACING.xl },
+        { paddingBottom: bottomInset + SPACING.xl },
       ]}
     >
       <View style={[styles.grid, { maxWidth: contentMaxWidth, alignSelf: 'center' }]}>

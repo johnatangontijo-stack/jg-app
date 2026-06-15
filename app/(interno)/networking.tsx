@@ -49,7 +49,7 @@ export default function NetworkingInternoScreen() {
 
   useEffect(() => {
     load();
-    const ch = supabase.channel('networking-interno')
+    const ch = supabase.channel(`networking-interno-${Math.random().toString(36).slice(2)}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'networking_interesses' }, () => load())
       .subscribe();
     return () => { supabase.removeChannel(ch); };

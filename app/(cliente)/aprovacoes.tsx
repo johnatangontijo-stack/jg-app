@@ -65,7 +65,7 @@ export default function AprovacoesClienteScreen() {
   useEffect(() => {
     if (!clienteId) return;
     const channel = supabase
-      .channel('aprovacoes-cliente')
+      .channel(`aprovacoes-cliente-${Math.random().toString(36).slice(2)}`)
       .on('postgres_changes', {
         event: 'INSERT', schema: 'public', table: 'aprovacoes',
         filter: `cliente_id=eq.${clienteId}`,

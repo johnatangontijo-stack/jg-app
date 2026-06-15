@@ -65,7 +65,7 @@ export default function ProducoesScreen() {
               <View key={p.id} style={[styles.aprovCard, { borderColor: COLORS.gold }]}>
                 <Text style={styles.aprovTitulo}>{p.titulo}</Text>
                 <Text style={styles.aprovMeta}>
-                  {p.tipo.toUpperCase()} · Enviado em {new Date(p.created_at).toLocaleDateString('pt-BR')}
+                  {(p.tipo ?? '').toUpperCase()} · Enviado em {new Date(p.created_at).toLocaleDateString('pt-BR')}
                 </Text>
                 <View style={styles.aprovPreview}>
                   <Text style={styles.aprovPreviewIcon}>▶</Text>

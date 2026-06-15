@@ -9,7 +9,7 @@ import { Icon, type IconName } from '../src/components/ui/Icon';
 import { useAuthStore } from '../src/stores/authStore';
 import { useNotificacoesStore } from '../src/stores/notificacoesStore';
 import {
-  webPushSupported, isSubscribed, subscribeWebPush, isStandalone, isIOS,
+  webPushSupported, isSubscribed, subscribeWebPush, syncWebPush, isStandalone, isIOS,
 } from '../src/lib/webPush';
 
 const TIPO_ICON: Record<string, IconName> = {
@@ -49,8 +49,12 @@ export default function NotificacoesScreen() {
   }, [profile?.id]);
 
   useEffect(() => {
-    if (supported) isSubscribed().then(setPushOn).catch(() => {});
-  }, [supported]);
+    if (!supported) return;
+    isSubscribed().then(async (on) => {
+      setPushOn(on);
+      if (on) await syncWebPush(profile?.id); // auto-salva a inscrição já existente
+    }).catch(() => {});
+  }, [supported, profile?.id]);
 
   const ativarPush = async () => {
     setPushBusy(true);

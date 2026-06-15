@@ -48,6 +48,30 @@ export async function isSubscribed(): Promise<boolean> {
   return Boolean(await reg.pushManager.getSubscription());
 }
 
+/** Salva/atualiza a inscrição no Supabase (lança em erro). */
+async function saveSub(json: PushSubscriptionJSON, profileId?: string | null) {
+  const { error } = await (supabase as any).from('web_push_subscriptions').upsert(
+    {
+      profile_id: profileId ?? null,
+      endpoint: json.endpoint,
+      p256dh: json.keys?.p256dh,
+      auth: json.keys?.auth,
+      user_agent: typeof navigator !== 'undefined' ? navigator.userAgent.slice(0, 200) : null,
+    },
+    { onConflict: 'endpoint' }
+  );
+  if (error) throw new Error(error.message ?? 'Falha ao salvar inscrição.');
+}
+
+/** Re-salva a inscrição já existente (idempotente, sem pedir permissão). */
+export async function syncWebPush(profileId?: string | null): Promise<boolean> {
+  if (!webPushSupported()) return false;
+  const reg = await navigator.serviceWorker.ready;
+  const sub = await reg.pushManager.getSubscription();
+  if (!sub) return false;
+  try { await saveSub(sub.toJSON(), profileId); return true; } catch { return false; }
+}
+
 /**
  * Pede permissão + assina + salva a inscrição no Supabase.
  * Deve ser chamado a partir de um toque do usuário (gesto).
@@ -68,16 +92,6 @@ export async function subscribeWebPush(profileId?: string | null): Promise<PushS
   }
 
   const json = sub.toJSON();
-  await (supabase as any).from('web_push_subscriptions').upsert(
-    {
-      profile_id: profileId ?? null,
-      endpoint: json.endpoint,
-      p256dh: json.keys?.p256dh,
-      auth: json.keys?.auth,
-      user_agent: typeof navigator !== 'undefined' ? navigator.userAgent.slice(0, 200) : null,
-    },
-    { onConflict: 'endpoint' }
-  );
-
+  await saveSub(json, profileId);
   return json;
 }

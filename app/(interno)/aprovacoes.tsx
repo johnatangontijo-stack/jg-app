@@ -48,7 +48,7 @@ export default function AprovacoesInternoScreen() {
   useEffect(() => {
     load();
     const ch = supabase
-      .channel('aprovacoes-interno')
+      .channel(`aprovacoes-interno-${Math.random().toString(36).slice(2)}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'aprovacoes' }, () => load())
       .subscribe();
     return () => { supabase.removeChannel(ch); };

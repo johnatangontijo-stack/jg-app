@@ -32,7 +32,7 @@ export function ProducaoCard({ producao, onPress }: ProducaoCardProps) {
       </View>
       <View style={styles.info}>
         <Text style={styles.titulo} numberOfLines={1}>{producao.titulo}</Text>
-        <Text style={styles.tipo}>{producao.tipo.toUpperCase()}</Text>
+        <Text style={styles.tipo}>{(producao.tipo ?? '').toUpperCase()}</Text>
         <Badge label={badge.label} variant={badge.variant} />
       </View>
     </TouchableOpacity>

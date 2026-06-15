@@ -32,7 +32,7 @@ export function useProducoes() {
 
     if (!clienteId) return;
     const channel = supabase
-      .channel('producoes-realtime')
+      .channel(`producoes-rt-${Math.random().toString(36).slice(2)}`)
       .on(
         'postgres_changes',
         {
