@@ -1,7 +1,7 @@
 // Service worker do JG App (PWA).
 // Estratégia network-first p/ navegação (evita servir bundle velho),
 // com fallback de cache p/ offline. Assets ganham cache runtime.
-const CACHE = 'jg-app-v2';
+const CACHE = 'jg-app-v3';
 const OFFLINE_FALLBACK = '/';
 
 self.addEventListener('install', (event) => {
@@ -14,6 +14,35 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((keys) =>
       Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))
     ).then(() => self.clients.claim())
+  );
+});
+
+// ── Web Push (PWA, iOS 16.4+ / Android / desktop) ───────────────────────────
+self.addEventListener('push', (event) => {
+  let data = {};
+  try { data = event.data ? event.data.json() : {}; }
+  catch { data = { title: 'JG App', body: event.data ? event.data.text() : '' }; }
+  const title = data.title || 'JG App';
+  event.waitUntil(
+    self.registration.showNotification(title, {
+      body: data.body || '',
+      icon: '/icon-192.png',
+      badge: '/icon-192.png',
+      data: { url: data.url || '/notificacoes' },
+    })
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = (event.notification.data && event.notification.data.url) || '/notificacoes';
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
+      for (const c of list) {
+        if ('focus' in c) { try { c.navigate(url); } catch (e) {} return c.focus(); }
+      }
+      if (self.clients.openWindow) return self.clients.openWindow(url);
+    })
   );
 });
 

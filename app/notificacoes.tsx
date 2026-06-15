@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator,
+  View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Alert,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -8,6 +8,9 @@ import { COLORS, SPACING, FONT, RADIUS } from '../src/constants/theme';
 import { Icon, type IconName } from '../src/components/ui/Icon';
 import { useAuthStore } from '../src/stores/authStore';
 import { useNotificacoesStore } from '../src/stores/notificacoesStore';
+import {
+  webPushSupported, isSubscribed, subscribeWebPush, isStandalone, isIOS,
+} from '../src/lib/webPush';
 
 const TIPO_ICON: Record<string, IconName> = {
   campanha_alerta: 'trafego',
@@ -36,9 +39,31 @@ export default function NotificacoesScreen() {
   const { profile } = useAuthStore();
   const { notificacoes, naoLidas, loading, load, marcarLida, marcarTodasLidas } = useNotificacoesStore();
 
+  const [pushOn, setPushOn] = useState(false);
+  const [pushBusy, setPushBusy] = useState(false);
+  const supported = webPushSupported();
+  const precisaInstalar = supported && isIOS() && !isStandalone();
+
   useEffect(() => {
     if (profile?.id) load(profile.id);
   }, [profile?.id]);
+
+  useEffect(() => {
+    if (supported) isSubscribed().then(setPushOn).catch(() => {});
+  }, [supported]);
+
+  const ativarPush = async () => {
+    setPushBusy(true);
+    try {
+      await subscribeWebPush(profile?.id);
+      setPushOn(true);
+      Alert.alert('Pronto!', 'Notificações ativadas neste aparelho.');
+    } catch (e: any) {
+      Alert.alert('Não deu', e?.message ?? 'Falha ao ativar notificações.');
+    } finally {
+      setPushBusy(false);
+    }
+  };
 
   return (
     <View style={[s.container, { paddingTop: insets.top }]}>
@@ -54,6 +79,30 @@ export default function NotificacoesScreen() {
           </TouchableOpacity>
         ) : <View style={{ width: 1 }} />}
       </View>
+
+      {/* Web Push (PWA) */}
+      {supported && !pushOn && (
+        precisaInstalar ? (
+          <View style={s.pushBanner}>
+            <Icon name="bell" size={18} color={COLORS.gold} />
+            <Text style={s.pushBannerText}>
+              Pra receber notificações no iPhone: toque em Compartilhar → "Adicionar à Tela de Início", abra o app instalado e volte aqui.
+            </Text>
+          </View>
+        ) : (
+          <TouchableOpacity style={s.pushBtn} onPress={ativarPush} disabled={pushBusy} activeOpacity={0.85}>
+            {pushBusy
+              ? <ActivityIndicator color={COLORS.black} size="small" />
+              : <><Icon name="bell" size={16} color={COLORS.black} /><Text style={s.pushBtnText}>Ativar notificações</Text></>}
+          </TouchableOpacity>
+        )
+      )}
+      {supported && pushOn && (
+        <View style={s.pushOk}>
+          <Icon name="aprovado" size={16} color={COLORS.success} />
+          <Text style={s.pushOkText}>Notificações ativas neste aparelho</Text>
+        </View>
+      )}
 
       {loading && notificacoes.length === 0 ? (
         <View style={s.center}><ActivityIndicator color={COLORS.gold} /></View>
@@ -101,6 +150,23 @@ const s = StyleSheet.create({
   },
   title: { color: COLORS.text, fontSize: 18, ...FONT.bold },
   markAll: { color: COLORS.gold, fontSize: 13, ...FONT.medium },
+  pushBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+    backgroundColor: COLORS.gold, margin: SPACING.lg, marginBottom: 0,
+    borderRadius: RADIUS.md, paddingVertical: SPACING.md,
+  },
+  pushBtnText: { color: COLORS.black, fontSize: 14, ...FONT.bold },
+  pushBanner: {
+    flexDirection: 'row', alignItems: 'flex-start', gap: 8,
+    backgroundColor: COLORS.surface1, borderWidth: 1, borderColor: COLORS.border,
+    margin: SPACING.lg, marginBottom: 0, borderRadius: RADIUS.md, padding: SPACING.md,
+  },
+  pushBannerText: { flex: 1, color: COLORS.text2, fontSize: 12, lineHeight: 17 },
+  pushOk: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    margin: SPACING.lg, marginBottom: 0, paddingVertical: 4,
+  },
+  pushOkText: { color: COLORS.success, fontSize: 12, ...FONT.medium },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: SPACING.sm },
   emptyText: { color: COLORS.text3, fontSize: 13 },
   card: {
