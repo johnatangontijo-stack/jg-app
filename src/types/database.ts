@@ -771,7 +771,7 @@ export type Database = {
         Row: {
           id: string
           profile_id: string
-          tipo: 'campanha_alerta' | 'producao_status' | 'meta_update' | 'pagamento' | 'feedback_novo' | 'geral'
+          tipo: 'campanha_alerta' | 'producao_status' | 'meta_update' | 'pagamento' | 'feedback_novo' | 'aprovacao' | 'geral'
           titulo: string
           mensagem: string
           lida: boolean
@@ -780,7 +780,7 @@ export type Database = {
         Insert: {
           id?: string
           profile_id: string
-          tipo: 'campanha_alerta' | 'producao_status' | 'meta_update' | 'pagamento' | 'feedback_novo' | 'geral'
+          tipo: 'campanha_alerta' | 'producao_status' | 'meta_update' | 'pagamento' | 'feedback_novo' | 'aprovacao' | 'geral'
           titulo: string
           mensagem: string
           lida?: boolean
@@ -789,7 +789,7 @@ export type Database = {
         Update: {
           id?: string
           profile_id?: string
-          tipo?: 'campanha_alerta' | 'producao_status' | 'meta_update' | 'pagamento' | 'feedback_novo' | 'geral'
+          tipo?: 'campanha_alerta' | 'producao_status' | 'meta_update' | 'pagamento' | 'feedback_novo' | 'aprovacao' | 'geral'
           titulo?: string
           mensagem?: string
           lida?: boolean
