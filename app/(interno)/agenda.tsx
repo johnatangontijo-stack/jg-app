@@ -8,6 +8,7 @@ import { supabase } from '../../src/lib/supabase';
 import { useAuthStore } from '../../src/stores/authStore';
 import { DateTimePicker } from '../../src/components/ui/DateTimePicker';
 import { GoldButton } from '../../src/components/ui/GoldButton';
+import { Icon, IconText } from '../../src/components/ui/Icon';
 import { Database } from '../../src/types/database';
 
 type Slot = Database['public']['Tables']['agenda_otimizacao']['Row'] & {
@@ -205,7 +206,7 @@ export default function AgendaInternoScreen() {
           <ActivityIndicator color={COLORS.gold} style={{ marginTop: 24 }} />
         ) : selectedSlots.length === 0 ? (
           <View style={s.emptyDay}>
-            <Text style={s.emptyIcon}>📅</Text>
+            <Icon name="agenda" size={36} color={COLORS.text3} />
             <Text style={s.emptyText}>Nenhum slot neste dia</Text>
             {!isCliente && <Text style={s.emptyHint}>Toque em "＋ Slot" para agendar</Text>}
           </View>
@@ -241,7 +242,7 @@ export default function AgendaInternoScreen() {
                         <Text style={s.eventPlat}>{slot.plataformas.join(' · ')}</Text>
                       )}
                       {slot.profiles?.nome && (
-                        <Text style={s.eventResp}>👤 {slot.profiles.nome}</Text>
+                        <IconText name="usuario" size={11} color={COLORS.text3} textStyle={s.eventResp}>{slot.profiles.nome}</IconText>
                       )}
                     </View>
 

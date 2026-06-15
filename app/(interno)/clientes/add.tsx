@@ -84,7 +84,7 @@ export default function AddClienteScreen() {
               onPress={() => set('campanha_status', s)}
             >
               <Text style={[styles.toggleText, form.campanha_status === s && styles.toggleTextActive]}>
-                {s === 'ativa' ? '🟢 Ativa' : '⏸ Pausada'}
+                {s === 'ativa' ? 'Ativa' : 'Pausada'}
               </Text>
             </TouchableOpacity>
           ))}

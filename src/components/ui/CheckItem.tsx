@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { COLORS, RADIUS, SPACING, FONT } from '../../constants/theme';
+import { IconText } from './Icon';
 
 interface CheckItemProps {
   label: string;
@@ -37,7 +38,7 @@ export function CheckItem({
       <View style={styles.content}>
         <Text style={[styles.label, checked && styles.done]}>{label}</Text>
         {tag && <Text style={styles.tag}>{tag}</Text>}
-        {atrasado && <Text style={styles.atrasadoText}>⚠ Atrasado</Text>}
+        {atrasado && <IconText name="alerta" size={11} color={COLORS.danger} textStyle={styles.atrasadoText}>Atrasado</IconText>}
       </View>
     </View>
   );

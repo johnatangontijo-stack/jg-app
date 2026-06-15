@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { COLORS, RADIUS, SPACING, FONT } from '../../constants/theme';
 import { Badge } from '../ui/Badge';
+import { Icon } from '../ui/Icon';
 import { Database } from '../../types/database';
 
 type Criativo = Database['public']['Tables']['criativos']['Row'];
@@ -17,7 +18,7 @@ export function CriativoCard({ criativo }: CriativoCardProps) {
   return (
     <View style={styles.card}>
       <View style={styles.thumb}>
-        <Text style={styles.thumbIcon}>🖼</Text>
+        <Icon name="imagem" size={28} color={COLORS.text3} />
         <View style={[styles.platBadge, { backgroundColor: plataformaCor }]}>
           <Text style={styles.platText}>{criativo.plataforma.toUpperCase()}</Text>
         </View>

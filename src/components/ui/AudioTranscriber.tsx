@@ -9,6 +9,7 @@ import {
   ActivityIndicator, Platform, Animated, Easing,
 } from 'react-native';
 import { COLORS, SPACING, FONT, RADIUS } from '../../constants/theme';
+import { Icon } from './Icon';
 
 interface Props {
   /** Chamado com o texto transcrito (acumulado até o momento) */
@@ -117,7 +118,7 @@ export function AudioTranscriber({ onTranscript, currentText = '' }: Props) {
           style={[s.btn, isRecording && s.btnActive]}
         >
           <Animated.View style={isRecording ? { transform: [{ scale: pulseAnim }] } : undefined}>
-            <Text style={s.btnIcon}>{isRecording ? '⏹' : '🎙'}</Text>
+            <Icon name={isRecording ? 'micOff' : 'mic'} size={20} color={isRecording ? COLORS.danger : COLORS.gold} />
           </Animated.View>
           <Text style={[s.btnText, isRecording && s.btnTextActive]}>
             {isRecording ? 'Parar gravação' : 'Gravar áudio'}

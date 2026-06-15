@@ -7,6 +7,7 @@ import { COLORS, SPACING, FONT, RADIUS } from '../../src/constants/theme';
 import { supabase } from '../../src/lib/supabase';
 import { useAuthStore } from '../../src/stores/authStore';
 import { Badge } from '../../src/components/ui/Badge';
+import { Icon, IconText, type IconName } from '../../src/components/ui/Icon';
 import { Database } from '../../src/types/database';
 
 type Aprovacao = Database['public']['Tables']['aprovacoes']['Row'] & {
@@ -15,14 +16,14 @@ type Aprovacao = Database['public']['Tables']['aprovacoes']['Row'] & {
 };
 
 const STATUS_INFO = {
-  aguardando_aprovacao: { label: 'Aguardando', variant: 'warning' as const, emoji: '⏳' },
-  aprovado:             { label: 'Aprovado',   variant: 'success' as const, emoji: '✅' },
-  reprovado:            { label: 'Reprovado',  variant: 'danger'  as const, emoji: '❌' },
-  revisao:              { label: 'Revisão',    variant: 'gray'    as const, emoji: '🔄' },
+  aguardando_aprovacao: { label: 'Aguardando', variant: 'warning' as const, icon: 'aguardando' as IconName },
+  aprovado:             { label: 'Aprovado',   variant: 'success' as const, icon: 'aprovado'   as IconName },
+  reprovado:            { label: 'Reprovado',  variant: 'danger'  as const, icon: 'reprovado'  as IconName },
+  revisao:              { label: 'Revisão',    variant: 'gray'    as const, icon: 'revisao'    as IconName },
 };
 
-const PLATAFORMA_EMOJI: Record<string, string> = {
-  instagram: '📸', facebook: '👥', linkedin: '💼', tiktok: '🎵', youtube: '▶️',
+const PLATAFORMA_ICON: Record<string, IconName> = {
+  instagram: 'instagram', facebook: 'facebook', linkedin: 'linkedin', tiktok: 'tiktok', youtube: 'youtube',
 };
 
 type Filtro = 'todas' | 'aguardando_aprovacao' | 'aprovado' | 'reprovado' | 'revisao';
@@ -78,10 +79,10 @@ export default function AprovacoesInternoScreen() {
 
       {/* Resumo */}
       <View style={s.resumoRow}>
-        <ResumoChip emoji="⏳" label="Aguardando" count={counts.aguardando_aprovacao} color={COLORS.warning} />
-        <ResumoChip emoji="✅" label="Aprovados"  count={counts.aprovado}             color={COLORS.success} />
-        <ResumoChip emoji="🔄" label="Revisão"    count={counts.revisao}             color="#8b5cf6" />
-        <ResumoChip emoji="❌" label="Reprovados" count={counts.reprovado}           color={COLORS.danger} />
+        <ResumoChip icon="aguardando" label="Aguardando" count={counts.aguardando_aprovacao} color={COLORS.warning} />
+        <ResumoChip icon="aprovado"   label="Aprovados"  count={counts.aprovado}             color={COLORS.success} />
+        <ResumoChip icon="revisao"    label="Revisão"    count={counts.revisao}             color="#8b5cf6" />
+        <ResumoChip icon="reprovado"  label="Reprovados" count={counts.reprovado}           color={COLORS.danger} />
       </View>
 
       {/* Filtros */}
@@ -108,7 +109,7 @@ export default function AprovacoesInternoScreen() {
       {/* Lista */}
       {lista.length === 0 && !loading && (
         <View style={s.emptyState}>
-          <Text style={s.emptyIcon}>📋</Text>
+          <Icon name="list" size={36} color={COLORS.text3} />
           <Text style={s.emptyText}>Nenhuma aprovação nesta categoria.</Text>
         </View>
       )}
@@ -127,16 +128,21 @@ export default function AprovacoesInternoScreen() {
                 <Text style={s.clienteNome}>
                   {apr.clientes?.nome_fantasia ?? apr.cliente_nome ?? '—'}
                 </Text>
-                <Text style={s.cardMeta}>
-                  {PLATAFORMA_EMOJI[apr.plataforma] ?? '📱'} {apr.plataforma} · {apr.tipo_conteudo === 'video' ? '🎬 Vídeo' : '🖼 Estático'}
-                </Text>
+                <View style={s.cardMeta}>
+                  <Icon name={PLATAFORMA_ICON[apr.plataforma] ?? 'tecnologia'} size={13} color={COLORS.text3} />
+                  <Text style={s.cardMetaText}>{apr.plataforma} · </Text>
+                  <Icon name={apr.tipo_conteudo === 'video' ? 'video' : 'imagem'} size={13} color={COLORS.text3} />
+                  <Text style={s.cardMetaText}>{apr.tipo_conteudo === 'video' ? 'Vídeo' : 'Estático'}</Text>
+                </View>
               </View>
-              <Badge label={`${info.emoji} ${info.label}`} variant={info.variant} />
+              <Badge label={info.label} variant={info.variant} />
             </View>
 
             {/* Responsável social media */}
             {apr.social_media_responsavel && (
-              <Text style={s.social}>👤 {apr.social_media_responsavel}</Text>
+              <IconText name="usuario" size={13} color={COLORS.text2} textStyle={s.social}>
+                {apr.social_media_responsavel}
+              </IconText>
             )}
 
             {/* Descrição */}
@@ -147,28 +153,33 @@ export default function AprovacoesInternoScreen() {
             {/* Prazo */}
             <View style={s.datas}>
               {apr.data_publicacao_prevista && (
-                <Text style={s.data}>
-                  📅 Pub: {new Date(apr.data_publicacao_prevista).toLocaleDateString('pt-BR')}
-                </Text>
+                <IconText name="publicar" size={12} color={COLORS.text3} textStyle={s.data}>
+                  Pub: {new Date(apr.data_publicacao_prevista).toLocaleDateString('pt-BR')}
+                </IconText>
               )}
               {apr.prazo_resposta && (
-                <Text style={[s.data, prazoExpired && { color: COLORS.danger }]}>
-                  ⏰ Prazo: {new Date(apr.prazo_resposta).toLocaleDateString('pt-BR')}
-                  {prazoExpired ? ' ⚠️ EXPIRADO' : ''}
-                </Text>
+                <IconText name={prazoExpired ? 'alerta' : 'prazo'} size={12}
+                  color={prazoExpired ? COLORS.danger : COLORS.text3}
+                  textStyle={[s.data, prazoExpired && { color: COLORS.danger }]}>
+                  Prazo: {new Date(apr.prazo_resposta).toLocaleDateString('pt-BR')}{prazoExpired ? ' · EXPIRADO' : ''}
+                </IconText>
               )}
             </View>
 
             {/* Arquivo */}
             {conteudo?.nome_arquivo && (
-              <Text style={s.arquivo}>📎 {conteudo.nome_arquivo}</Text>
+              <IconText name="arquivo" size={13} color={COLORS.gold} textStyle={s.arquivo}>
+                {conteudo.nome_arquivo}
+              </IconText>
             )}
 
             {/* Resposta do cliente */}
             {apr.status !== 'aguardando_aprovacao' && (
               <View style={s.respostaBox}>
                 {apr.resposta_comentario && (
-                  <Text style={s.respostaText}>💬 "{apr.resposta_comentario}"</Text>
+                  <IconText name="comment" size={12} color={COLORS.text2} textStyle={s.respostaText}>
+                    "{apr.resposta_comentario}"
+                  </IconText>
                 )}
                 <Text style={s.respostaData}>
                   {apr.respondido_em ? new Date(apr.respondido_em).toLocaleString('pt-BR', { dateStyle: 'medium', timeStyle: 'short' }) : ''}
@@ -187,11 +198,12 @@ export default function AprovacoesInternoScreen() {
   );
 }
 
-function ResumoChip({ emoji, label, count, color }: { emoji: string; label: string; count: number; color: string }) {
+function ResumoChip({ icon, label, count, color }: { icon: IconName; label: string; count: number; color: string }) {
   return (
     <View style={[rs.chip, { borderColor: color + '44' }]}>
+      <Icon name={icon} size={16} color={color} />
       <Text style={[rs.num, { color }]}>{count}</Text>
-      <Text style={rs.label}>{emoji} {label}</Text>
+      <Text style={rs.label}>{label}</Text>
     </View>
   );
 }
@@ -214,7 +226,6 @@ const s = StyleSheet.create({
   filtroText: { color: COLORS.text3, fontSize: 12 },
   filtroTextActive: { color: COLORS.gold, ...FONT.medium },
   emptyState: { alignItems: 'center', paddingVertical: 48, gap: SPACING.sm },
-  emptyIcon: { fontSize: 36 },
   emptyText: { color: COLORS.text3, fontSize: 13 },
   card: {
     backgroundColor: COLORS.surface2, borderRadius: RADIUS.lg, borderLeftWidth: 4,
@@ -223,7 +234,8 @@ const s = StyleSheet.create({
   cardTop: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: SPACING.sm },
   cardTopLeft: { flex: 1, gap: 2 },
   clienteNome: { color: COLORS.text, fontSize: 14, ...FONT.bold },
-  cardMeta: { color: COLORS.text3, fontSize: 12, textTransform: 'capitalize' },
+  cardMeta: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 3 },
+  cardMetaText: { color: COLORS.text3, fontSize: 12, textTransform: 'capitalize' },
   social: { color: COLORS.text2, fontSize: 12 },
   descricao: { color: COLORS.text2, fontSize: 13, lineHeight: 18 },
   datas: { flexDirection: 'row', gap: SPACING.md, flexWrap: 'wrap' },

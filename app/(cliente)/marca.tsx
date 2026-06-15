@@ -9,6 +9,7 @@ import { supabase } from '../../src/lib/supabase';
 import { Card } from '../../src/components/ui/Card';
 import { Badge } from '../../src/components/ui/Badge';
 import { GoldButton } from '../../src/components/ui/GoldButton';
+import { Icon, IconText, type IconName } from '../../src/components/ui/Icon';
 import { Database } from '../../src/types/database';
 import { AudioTranscriber } from '../../src/components/ui/AudioTranscriber';
 
@@ -60,7 +61,7 @@ export default function MarcaScreen() {
   if (loading) return <View style={styles.center}><ActivityIndicator color={COLORS.gold} /></View>;
 
   const TIPOS_ATIVO: ClienteAtivo['tipo'][] = ['logo', 'paleta', 'fotos', 'videos'];
-  const TIPO_ICONS: Record<string, string> = { logo: '🎨', paleta: '🖌', fotos: '📸', videos: '🎬' };
+  const TIPO_ICONS: Record<string, IconName> = { logo: 'marca', paleta: 'paleta', fotos: 'imagem', videos: 'video' };
 
   return (
     <View style={{ flex: 1 }}>
@@ -124,7 +125,7 @@ export default function MarcaScreen() {
               const ativo = ativos.find((a) => a.tipo === tipo);
               return (
                 <TouchableOpacity key={tipo} style={styles.ativoCell} activeOpacity={0.8}>
-                  <Text style={styles.ativoIcon}>{TIPO_ICONS[tipo]}</Text>
+                  <Icon name={TIPO_ICONS[tipo] ?? 'imagem'} size={24} color={COLORS.gold} />
                   <Text style={styles.ativoLabel}>{tipo.charAt(0).toUpperCase() + tipo.slice(1)}</Text>
                   {ativo ? (
                     <Badge label="Salvo" variant="success" />
@@ -150,7 +151,7 @@ export default function MarcaScreen() {
 
               {/* Gravação de áudio */}
               <View style={styles.audioSection}>
-                <Text style={styles.audioLabel}>🎙 Fale sobre sua empresa</Text>
+                <IconText name="mic" size={14} color={COLORS.text} textStyle={styles.audioLabel}>Fale sobre sua empresa</IconText>
                 <Text style={styles.audioSub}>Selecione o campo e clique em Gravar — o texto aparece automaticamente.</Text>
 
                 {/* Selector de campo */}

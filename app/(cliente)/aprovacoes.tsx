@@ -7,19 +7,20 @@ import { COLORS, SPACING, FONT, RADIUS } from '../../src/constants/theme';
 import { supabase } from '../../src/lib/supabase';
 import { useAuthStore } from '../../src/stores/authStore';
 import { GoldButton } from '../../src/components/ui/GoldButton';
+import { Icon, IconText, type IconName } from '../../src/components/ui/Icon';
 import { Database } from '../../src/types/database';
 
 type Aprovacao = Database['public']['Tables']['aprovacoes']['Row'];
 
 const STATUS_INFO = {
-  aguardando_aprovacao: { label: 'Aguardando',  emoji: '⏳', color: COLORS.warning },
-  aprovado:             { label: 'Aprovado',    emoji: '✅', color: COLORS.success },
-  reprovado:            { label: 'Reprovado',   emoji: '❌', color: COLORS.danger },
-  revisao:              { label: 'Revisão',     emoji: '🔄', color: '#8b5cf6' },
+  aguardando_aprovacao: { label: 'Aguardando',  icon: 'aguardando' as IconName, color: COLORS.warning },
+  aprovado:             { label: 'Aprovado',    icon: 'aprovado'   as IconName, color: COLORS.success },
+  reprovado:            { label: 'Reprovado',   icon: 'reprovado'  as IconName, color: COLORS.danger },
+  revisao:              { label: 'Revisão',     icon: 'revisao'    as IconName, color: '#8b5cf6' },
 };
 
-const PLATAFORMA_EMOJI: Record<string, string> = {
-  instagram: '📸', facebook: '👥', linkedin: '💼', tiktok: '🎵', youtube: '▶️',
+const PLATAFORMA_ICON: Record<string, IconName> = {
+  instagram: 'instagram', facebook: 'facebook', linkedin: 'linkedin', tiktok: 'tiktok', youtube: 'youtube',
 };
 
 const SUPABASE_FUNCTIONS_URL = 'https://ieekdxxmhkbslskgxbdg.supabase.co/functions/v1';
@@ -119,7 +120,7 @@ export default function AprovacoesClienteScreen() {
   if (!clienteId) {
     return (
       <View style={s.center}>
-        <Text style={s.emptyIcon}>📋</Text>
+        <Icon name="list" size={40} color={COLORS.text3} />
         <Text style={s.emptyText}>Nenhum cliente associado ao seu perfil.</Text>
       </View>
     );
@@ -137,7 +138,9 @@ export default function AprovacoesClienteScreen() {
           <View>
             <Text style={s.pageTitle}>Aprovações</Text>
             {pendentes > 0 && (
-              <Text style={s.pendenteBadge}>⏳ {pendentes} aguardando sua resposta</Text>
+              <IconText name="aguardando" size={13} color={COLORS.warning} textStyle={s.pendenteBadge}>
+                {pendentes} aguardando sua resposta
+              </IconText>
             )}
           </View>
         </View>
@@ -161,7 +164,7 @@ export default function AprovacoesClienteScreen() {
 
         {listaFiltrada.length === 0 && (
           <View style={s.emptyState}>
-            <Text style={s.emptyIcon}>🎨</Text>
+            <Icon name="aprovacoes" size={40} color={COLORS.text3} />
             <Text style={s.emptyText}>Nenhuma aprovação {filtro === 'respondidas' ? 'respondida' : 'pendente'} ainda.</Text>
           </View>
         )}
@@ -180,24 +183,33 @@ export default function AprovacoesClienteScreen() {
             >
               {/* Urgente */}
               {prazoExpired && (
-                <Text style={s.urgente}>⚠️ Prazo expirado!</Text>
+                <IconText name="alerta" size={12} color={COLORS.danger} textStyle={s.urgente}>
+                  Prazo expirado!
+                </IconText>
               )}
 
               {/* Topo */}
               <View style={s.cardTop}>
-                <Text style={s.plataforma}>
-                  {PLATAFORMA_EMOJI[apr.plataforma] ?? '📱'} {apr.plataforma}
-                </Text>
+                <IconText name={PLATAFORMA_ICON[apr.plataforma] ?? 'tecnologia'} size={15}
+                  color={COLORS.text} textStyle={s.plataforma}>
+                  {apr.plataforma}
+                </IconText>
                 <View style={[s.statusChip, { backgroundColor: info.color + '22', borderColor: info.color }]}>
-                  <Text style={[s.statusText, { color: info.color }]}>{info.emoji} {info.label}</Text>
+                  <Icon name={info.icon} size={11} color={info.color} />
+                  <Text style={[s.statusText, { color: info.color }]}>{info.label}</Text>
                 </View>
               </View>
 
               {/* Tipo + responsável */}
               <View style={s.cardMeta}>
-                <Text style={s.tipoText}>{apr.tipo_conteudo === 'video' ? '🎬 Vídeo' : '🖼 Estático'}</Text>
+                <IconText name={apr.tipo_conteudo === 'video' ? 'video' : 'imagem'} size={12}
+                  color={COLORS.text2} textStyle={s.tipoText}>
+                  {apr.tipo_conteudo === 'video' ? 'Vídeo' : 'Estático'}
+                </IconText>
                 {apr.social_media_responsavel && (
-                  <Text style={s.respText}>👤 {apr.social_media_responsavel}</Text>
+                  <IconText name="usuario" size={12} color={COLORS.text3} textStyle={s.respText}>
+                    {apr.social_media_responsavel}
+                  </IconText>
                 )}
               </View>
 
@@ -208,14 +220,17 @@ export default function AprovacoesClienteScreen() {
 
               {/* Prazo */}
               {apr.prazo_resposta && (
-                <Text style={[s.prazo, prazoExpired && { color: COLORS.danger }]}>
-                  ⏰ Responder até: {new Date(apr.prazo_resposta).toLocaleString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                </Text>
+                <IconText name="prazo" size={11} color={prazoExpired ? COLORS.danger : COLORS.text3}
+                  textStyle={[s.prazo, prazoExpired && { color: COLORS.danger }]}>
+                  Responder até: {new Date(apr.prazo_resposta).toLocaleString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                </IconText>
               )}
 
               {/* Arquivo */}
               {conteudo?.url && (
-                <Text style={s.arquivo}>📎 {conteudo.nome_arquivo ?? 'Ver arquivo'}</Text>
+                <IconText name="arquivo" size={12} color={COLORS.gold} textStyle={s.arquivo}>
+                  {conteudo.nome_arquivo ?? 'Ver arquivo'}
+                </IconText>
               )}
 
               {/* Resposta dada */}
@@ -227,7 +242,7 @@ export default function AprovacoesClienteScreen() {
               )}
 
               {apr.status === 'aguardando_aprovacao' && (
-                <Text style={s.tapHint}>Toque para ver e responder →</Text>
+                <Text style={s.tapHint}>Toque para ver e responder</Text>
               )}
             </TouchableOpacity>
           );
@@ -245,17 +260,20 @@ export default function AprovacoesClienteScreen() {
             >
               {/* Cabeçalho */}
               <View style={s.sheetHeader}>
-                <Text style={s.sheetTitle}>
-                  {PLATAFORMA_EMOJI[selected.plataforma] ?? '📱'} {selected.plataforma} · {selected.tipo_conteudo === 'video' ? 'Vídeo' : 'Estático'}
-                </Text>
-                <TouchableOpacity onPress={() => setSelected(null)}>
-                  <Text style={s.closeBtn}>✕</Text>
+                <IconText name={PLATAFORMA_ICON[selected.plataforma] ?? 'tecnologia'} size={16}
+                  color={COLORS.text} textStyle={s.sheetTitle} style={{ flex: 1 }}>
+                  {selected.plataforma} · {selected.tipo_conteudo === 'video' ? 'Vídeo' : 'Estático'}
+                </IconText>
+                <TouchableOpacity onPress={() => setSelected(null)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                  <Icon name="close" size={22} color={COLORS.text3} />
                 </TouchableOpacity>
               </View>
 
               {/* Responsável */}
               {selected.social_media_responsavel && (
-                <Text style={s.sheetResp}>👤 Criado por {selected.social_media_responsavel}</Text>
+                <IconText name="usuario" size={13} color={COLORS.text3} textStyle={s.sheetResp}>
+                  Criado por {selected.social_media_responsavel}
+                </IconText>
               )}
 
               {/* Arquivo / Link */}
@@ -264,9 +282,10 @@ export default function AprovacoesClienteScreen() {
                   style={s.linkBtn}
                   onPress={() => Linking.openURL((selected.conteudo as any).url)}
                 >
-                  <Text style={s.linkBtnText}>
-                    {selected.tipo_conteudo === 'video' ? '▶️' : '🖼'} Abrir {(selected.conteudo as any).nome_arquivo ?? 'arquivo'}
-                  </Text>
+                  <IconText name={selected.tipo_conteudo === 'video' ? 'video' : 'imagem'} size={15}
+                    color={COLORS.gold} textStyle={s.linkBtnText}>
+                    Abrir {(selected.conteudo as any).nome_arquivo ?? 'arquivo'}
+                  </IconText>
                   <Text style={s.linkBtnHint}>Toque para visualizar a peça</Text>
                 </TouchableOpacity>
               )}
@@ -293,9 +312,9 @@ export default function AprovacoesClienteScreen() {
               {selected.data_publicacao_prevista && (
                 <View style={s.infoBlock}>
                   <Text style={s.infoLabel}>Publicação prevista</Text>
-                  <Text style={s.infoText}>
-                    📅 {new Date(selected.data_publicacao_prevista).toLocaleString('pt-BR', { dateStyle: 'long', timeStyle: 'short' })}
-                  </Text>
+                  <IconText name="publicar" size={14} color={COLORS.text} textStyle={s.infoText}>
+                    {new Date(selected.data_publicacao_prevista).toLocaleString('pt-BR', { dateStyle: 'long', timeStyle: 'short' })}
+                  </IconText>
                 </View>
               )}
 
@@ -303,18 +322,22 @@ export default function AprovacoesClienteScreen() {
               {selected.prazo_resposta && (
                 <View style={s.infoBlock}>
                   <Text style={s.infoLabel}>Prazo para resposta</Text>
-                  <Text style={[s.infoText, new Date(selected.prazo_resposta) < new Date() && { color: COLORS.danger }]}>
-                    ⏰ {new Date(selected.prazo_resposta).toLocaleString('pt-BR', { dateStyle: 'long', timeStyle: 'short' })}
-                  </Text>
+                  <IconText name="prazo" size={14}
+                    color={new Date(selected.prazo_resposta) < new Date() ? COLORS.danger : COLORS.text}
+                    textStyle={[s.infoText, new Date(selected.prazo_resposta) < new Date() && { color: COLORS.danger }]}>
+                    {new Date(selected.prazo_resposta).toLocaleString('pt-BR', { dateStyle: 'long', timeStyle: 'short' })}
+                  </IconText>
                 </View>
               )}
 
               {/* Se já respondeu */}
               {selected.status !== 'aguardando_aprovacao' ? (
                 <View style={[s.jaRespondido, { borderColor: STATUS_INFO[selected.status]?.color ?? COLORS.border }]}>
-                  <Text style={[s.jaRespondidoTitle, { color: STATUS_INFO[selected.status]?.color ?? COLORS.text }]}>
-                    {STATUS_INFO[selected.status]?.emoji} Você {selected.status === 'aprovado' ? 'aprovou' : selected.status === 'reprovado' ? 'reprovou' : 'pediu revisão'} esta peça
-                  </Text>
+                  <IconText name={STATUS_INFO[selected.status]?.icon ?? 'aguardando'} size={16}
+                    color={STATUS_INFO[selected.status]?.color ?? COLORS.text}
+                    textStyle={[s.jaRespondidoTitle, { color: STATUS_INFO[selected.status]?.color ?? COLORS.text }]}>
+                    Você {selected.status === 'aprovado' ? 'aprovou' : selected.status === 'reprovado' ? 'reprovou' : 'pediu revisão'} esta peça
+                  </IconText>
                   {selected.resposta_comentario && (
                     <Text style={s.jaRespondidoComentario}>"{selected.resposta_comentario}"</Text>
                   )}
@@ -348,7 +371,11 @@ export default function AprovacoesClienteScreen() {
                       onPress={() => responder('revisao')}
                       disabled={sending}
                     >
-                      <Text style={s.acaoBtnTextRevisao}>{sending ? '...' : '🔄 Pedir Revisão'}</Text>
+                      {sending ? <Text style={s.acaoBtnTextRevisao}>...</Text> : (
+                        <IconText name="revisao" size={15} color="#8b5cf6" textStyle={s.acaoBtnTextRevisao}>
+                          Pedir Revisão
+                        </IconText>
+                      )}
                     </TouchableOpacity>
 
                     <TouchableOpacity
@@ -356,11 +383,15 @@ export default function AprovacoesClienteScreen() {
                       onPress={() => responder('reprovado')}
                       disabled={sending}
                     >
-                      <Text style={s.acaoBtnTextReprovar}>{sending ? '...' : '❌ Reprovar'}</Text>
+                      {sending ? <Text style={s.acaoBtnTextReprovar}>...</Text> : (
+                        <IconText name="reprovado" size={15} color={COLORS.danger} textStyle={s.acaoBtnTextReprovar}>
+                          Reprovar
+                        </IconText>
+                      )}
                     </TouchableOpacity>
 
                     <GoldButton
-                      label={sending ? 'Enviando...' : '✅ Aprovar'}
+                      label={sending ? 'Enviando...' : 'Aprovar'}
                       onPress={() => responder('aprovado')}
                       loading={sending}
                       style={s.acaoBtnAprovar}
@@ -396,7 +427,6 @@ const s = StyleSheet.create({
   filtroTextActive: { color: COLORS.gold, ...FONT.medium },
 
   emptyState: { alignItems: 'center', paddingVertical: 48, gap: SPACING.sm },
-  emptyIcon: { fontSize: 40 },
   emptyText: { color: COLORS.text3, fontSize: 13, textAlign: 'center' },
 
   card: {
@@ -408,7 +438,7 @@ const s = StyleSheet.create({
   urgente: { color: COLORS.danger, fontSize: 12, ...FONT.bold },
   cardTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   plataforma: { color: COLORS.text, fontSize: 14, ...FONT.bold, textTransform: 'capitalize' },
-  statusChip: { borderRadius: RADIUS.full, borderWidth: 1, paddingHorizontal: SPACING.sm, paddingVertical: 3 },
+  statusChip: { flexDirection: 'row', alignItems: 'center', gap: 4, borderRadius: RADIUS.full, borderWidth: 1, paddingHorizontal: SPACING.sm, paddingVertical: 3 },
   statusText: { fontSize: 11, ...FONT.medium },
   cardMeta: { flexDirection: 'row', gap: SPACING.md },
   tipoText: { color: COLORS.text2, fontSize: 12 },

@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { COLORS, SPACING, FONT, RADIUS } from '../../src/constants/theme';
+import { Icon } from '../../src/components/ui/Icon';
 import { useCliente } from '../../src/hooks/useCliente';
 import { useTrafego } from '../../src/hooks/useTrafego';
 import { useProducoes } from '../../src/hooks/useProducoes';
@@ -163,7 +164,7 @@ export default function ClienteInicio() {
             onPress={() => setFeedbackTipo('elogio')}
             activeOpacity={0.8}
           >
-            <Text style={styles.feedbackEmoji}>👏</Text>
+            <Icon name="elogio" size={22} color={COLORS.success} />
             <Text style={[styles.feedbackLabel, { color: COLORS.success }]}>Elogiar</Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -171,7 +172,7 @@ export default function ClienteInicio() {
             onPress={() => setFeedbackTipo('sugestao')}
             activeOpacity={0.8}
           >
-            <Text style={styles.feedbackEmoji}>💡</Text>
+            <Icon name="ideia" size={22} color={COLORS.warning} />
             <Text style={[styles.feedbackLabel, { color: COLORS.warning }]}>Sugerir</Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -179,7 +180,7 @@ export default function ClienteInicio() {
             onPress={() => setFeedbackTipo('reclamacao')}
             activeOpacity={0.8}
           >
-            <Text style={styles.feedbackEmoji}>⚠️</Text>
+            <Icon name="alerta" size={22} color={COLORS.danger} />
             <Text style={[styles.feedbackLabel, { color: COLORS.danger }]}>Reclamar</Text>
           </TouchableOpacity>
         </View>

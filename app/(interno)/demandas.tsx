@@ -5,6 +5,7 @@ import { COLORS, SPACING, FONT, RADIUS } from '../../src/constants/theme';
 import { supabase } from '../../src/lib/supabase';
 import { useAuthStore } from '../../src/stores/authStore';
 import { DemandaItem } from '../../src/components/interno/DemandaItem';
+import { Icon, IconText } from '../../src/components/ui/Icon';
 import { Database } from '../../src/types/database';
 
 type Demanda = Database['public']['Tables']['demandas']['Row'] & {
@@ -66,7 +67,7 @@ export default function DemandasScreen() {
 
       {urgentes.length > 0 && (
         <>
-          <Text style={[styles.sectionTitle, { color: COLORS.danger }]}>🚨 Urgentes</Text>
+          <IconText name="alerta" size={14} color={COLORS.danger} textStyle={[styles.sectionTitle, { color: COLORS.danger }]}>Urgentes</IconText>
           {urgentes.map((d) => (
             <DemandaItem
               key={d.id}
@@ -81,7 +82,7 @@ export default function DemandasScreen() {
 
       {paraHoje.length > 0 && (
         <>
-          <Text style={styles.sectionTitle}>📌 Para hoje</Text>
+          <IconText name="pin" size={14} color={COLORS.text} textStyle={styles.sectionTitle}>Para hoje</IconText>
           {paraHoje.map((d) => (
             <DemandaItem
               key={d.id}
@@ -96,7 +97,7 @@ export default function DemandasScreen() {
 
       {restante.length > 0 && (
         <>
-          <Text style={styles.sectionTitle}>📋 Esta semana</Text>
+          <IconText name="list" size={14} color={COLORS.text} textStyle={styles.sectionTitle}>Esta semana</IconText>
           {restante.map((d) => (
             <DemandaItem
               key={d.id}
@@ -111,7 +112,7 @@ export default function DemandasScreen() {
 
       {demandas.length === 0 && (
         <View style={styles.empty}>
-          <Text style={styles.emptyIcon}>✅</Text>
+          <Icon name="aprovado" size={36} color={COLORS.success} />
           <Text style={styles.emptyText}>Nada pendente. Deixa com a gente!</Text>
         </View>
       )}

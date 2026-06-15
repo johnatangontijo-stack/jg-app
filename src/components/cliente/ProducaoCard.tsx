@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { COLORS, RADIUS, SPACING, FONT } from '../../constants/theme';
 import { Badge } from '../ui/Badge';
+import { Icon } from '../ui/Icon';
 import { Database } from '../../types/database';
 
 type Producao = Database['public']['Tables']['producoes']['Row'];
@@ -27,7 +28,7 @@ export function ProducaoCard({ producao, onPress }: ProducaoCardProps) {
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.8}>
       <View style={styles.thumb}>
-        <Text style={styles.thumbIcon}>🎬</Text>
+        <Icon name="video" size={28} color={COLORS.text3} />
       </View>
       <View style={styles.info}>
         <Text style={styles.titulo} numberOfLines={1}>{producao.titulo}</Text>

@@ -28,7 +28,9 @@
     },
     "web": {
       "favicon": "./assets/favicon.png",
-      "bundler": "metro"
+      "bundler": "metro",
+      "themeColor": "#0f0f0f",
+      "backgroundColor": "#0f0f0f"
     },
     "plugins": [
       "expo-router",

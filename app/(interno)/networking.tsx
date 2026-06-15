@@ -6,6 +6,8 @@ import {
 import { COLORS, SPACING, FONT, RADIUS } from '../../src/constants/theme';
 import { supabase } from '../../src/lib/supabase';
 import { Badge } from '../../src/components/ui/Badge';
+import { Icon, IconText } from '../../src/components/ui/Icon';
+import { setorIcon } from '../../src/constants/setores';
 
 type Interesse = {
   id: string;
@@ -23,12 +25,6 @@ const STATUS_BADGE = {
   em_contato: { label: 'Em contato',  variant: 'gray'    as const },
   conectado:  { label: 'Conectado',   variant: 'success' as const },
   cancelado:  { label: 'Cancelado',   variant: 'danger'  as const },
-};
-
-const SETOR_EMOJI: Record<string, string> = {
-  'E-commerce': '🛒', 'Saúde': '🏥', 'Moda': '👗', 'Construção Civil': '🏗️',
-  'Automotivo': '🚗', 'Alimentação': '🍽️', 'Educação': '📚', 'Tecnologia': '💻',
-  'Beleza': '💄', 'Fitness': '💪', 'Imobiliário': '🏠', 'Jurídico': '⚖️',
 };
 
 type Filtro = 'todos' | 'pendente' | 'em_contato' | 'conectado';
@@ -113,7 +109,7 @@ export default function NetworkingInternoScreen() {
 
         {lista.length === 0 && !loading && (
           <View style={s.emptyBox}>
-            <Text style={s.emptyIcon}>🤝</Text>
+            <Icon name="networking" size={36} color={COLORS.text3} />
             <Text style={s.emptyText}>Nenhuma solicitação nesta categoria.</Text>
           </View>
         )}
@@ -128,13 +124,14 @@ export default function NetworkingInternoScreen() {
               activeOpacity={0.8}
             >
               <View style={s.cardTop}>
-                <Text style={s.cardEmoji}>{SETOR_EMOJI[item.setor] ?? '🤝'}</Text>
+                <View style={s.cardEmoji}>
+                  <Icon name={setorIcon(item.setor)} size={22} color={COLORS.gold} />
+                </View>
                 <View style={{ flex: 1 }}>
                   <Text style={s.cardSetor}>{item.setor}</Text>
-                  <Text style={s.cardCliente}>
-                    🏢 {item.clientes?.nome_fantasia ?? '—'}
-                    {item.clientes?.ramo ? ` · ${item.clientes.ramo}` : ''}
-                  </Text>
+                  <IconText name="empresa" size={12} color={COLORS.text2} textStyle={s.cardCliente}>
+                    {item.clientes?.nome_fantasia ?? '—'}{item.clientes?.ramo ? ` · ${item.clientes.ramo}` : ''}
+                  </IconText>
                   {item.descricao && (
                     <Text style={s.cardDesc} numberOfLines={2}>"{item.descricao}"</Text>
                   )}
@@ -155,9 +152,9 @@ export default function NetworkingInternoScreen() {
           <View style={s.modal}>
             {selected && (
               <>
-                <Text style={s.modalTitle}>
-                  {SETOR_EMOJI[selected.setor] ?? '🤝'} {selected.setor}
-                </Text>
+                <IconText name={setorIcon(selected.setor)} size={18} color={COLORS.gold} textStyle={s.modalTitle}>
+                  {selected.setor}
+                </IconText>
                 <View style={s.modalInfo}>
                   <Text style={s.modalInfoLabel}>Cliente solicitante</Text>
                   <Text style={s.modalInfoVal}>{selected.clientes?.nome_fantasia}</Text>
@@ -178,7 +175,9 @@ export default function NetworkingInternoScreen() {
                       onPress={() => updateStatus(selected.id, 'em_contato')}
                       disabled={saving}
                     >
-                      <Text style={[s.acaoBtnText, { color: '#8b5cf6' }]}>📞 Em contato</Text>
+                      <IconText name="emContato" size={14} color="#8b5cf6" textStyle={[s.acaoBtnText, { color: '#8b5cf6' }]}>
+                        Em contato
+                      </IconText>
                     </TouchableOpacity>
                   )}
                   {selected.status !== 'conectado' && (
@@ -187,7 +186,9 @@ export default function NetworkingInternoScreen() {
                       onPress={() => updateStatus(selected.id, 'conectado')}
                       disabled={saving}
                     >
-                      <Text style={[s.acaoBtnText, { color: COLORS.success }]}>✅ Conectado</Text>
+                      <IconText name="conectado" size={14} color={COLORS.success} textStyle={[s.acaoBtnText, { color: COLORS.success }]}>
+                        Conectado
+                      </IconText>
                     </TouchableOpacity>
                   )}
                   {selected.status !== 'cancelado' && (
@@ -196,7 +197,9 @@ export default function NetworkingInternoScreen() {
                       onPress={() => updateStatus(selected.id, 'cancelado')}
                       disabled={saving}
                     >
-                      <Text style={[s.acaoBtnText, { color: COLORS.danger }]}>✕ Cancelar</Text>
+                      <IconText name="close" size={14} color={COLORS.danger} textStyle={[s.acaoBtnText, { color: COLORS.danger }]}>
+                        Cancelar
+                      </IconText>
                     </TouchableOpacity>
                   )}
                 </View>
@@ -227,12 +230,11 @@ const s = StyleSheet.create({
   filtroText: { color: COLORS.text3, fontSize: 12 },
   filtroTextActive: { color: COLORS.gold, ...FONT.medium },
   emptyBox: { alignItems: 'center', paddingVertical: 48, gap: SPACING.sm },
-  emptyIcon: { fontSize: 36 },
   emptyText: { color: COLORS.text3, fontSize: 13 },
   card: { backgroundColor: COLORS.surface2, borderRadius: RADIUS.lg, padding: SPACING.md, gap: SPACING.xs, borderWidth: 1, borderColor: COLORS.borderWeak },
   cardPendente: { borderLeftWidth: 4, borderLeftColor: COLORS.warning },
   cardTop: { flexDirection: 'row', alignItems: 'flex-start', gap: SPACING.sm },
-  cardEmoji: { fontSize: 26, marginTop: 2 },
+  cardEmoji: { width: 40, height: 40, borderRadius: RADIUS.full, backgroundColor: 'rgba(201,168,76,0.10)', borderWidth: 1, borderColor: COLORS.border, alignItems: 'center', justifyContent: 'center' },
   cardSetor: { color: COLORS.text, fontSize: 14, ...FONT.bold },
   cardCliente: { color: COLORS.text2, fontSize: 12, marginTop: 2 },
   cardDesc: { color: COLORS.text3, fontSize: 12, fontStyle: 'italic', marginTop: 2 },

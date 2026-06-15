@@ -13,6 +13,7 @@ import {
 import * as LocalAuthentication from 'expo-local-authentication';
 import * as SecureStore from 'expo-secure-store';
 import { useAuthStore } from '../../src/stores/authStore';
+import { Icon } from '../../src/components/ui/Icon';
 import { COLORS, RADIUS, SPACING, FONT } from '../../src/constants/theme';
 import { GoldButton } from '../../src/components/ui/GoldButton';
 
@@ -115,7 +116,7 @@ export default function LoginScreen() {
                 onPress={() => setShowSenha((v) => !v)}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
-                <Text style={styles.eyeIcon}>{showSenha ? '🙈' : '👁'}</Text>
+                <Icon name={showSenha ? 'eyeOff' : 'eye'} size={20} color={COLORS.text3} />
               </TouchableOpacity>
             </View>
           </View>

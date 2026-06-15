@@ -5,6 +5,7 @@ import { useMetas } from '../../src/hooks/useMetas';
 import { Card } from '../../src/components/ui/Card';
 import { ProgressBar } from '../../src/components/ui/ProgressBar';
 import { CheckItem } from '../../src/components/ui/CheckItem';
+import { Icon } from '../../src/components/ui/Icon';
 
 function fmtBRL(v: number) {
   return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -49,7 +50,7 @@ export default function MetasScreen() {
 
           {/* Aviso equipe */}
           <Card style={styles.infoCard}>
-            <Text style={styles.infoIcon}>🤝</Text>
+            <Icon name="networking" size={24} color={COLORS.gold} />
             <Text style={styles.infoText}>
               A meta é fruto do trabalho em equipe. Cada ação — sua e nossa — conta para chegar lá.
             </Text>

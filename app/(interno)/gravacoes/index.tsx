@@ -7,6 +7,7 @@ import { router } from 'expo-router';
 import { supabase } from '../../../src/lib/supabase';
 import { COLORS, SPACING, FONT, RADIUS } from '../../../src/constants/theme';
 import { Card } from '../../../src/components/ui/Card';
+import { Icon, IconText } from '../../../src/components/ui/Icon';
 import { Database } from '../../../src/types/database';
 
 type Gravacao = Omit<Database['public']['Tables']['gravacoes']['Row'], 'link_gravacao'> & {
@@ -120,15 +121,15 @@ export default function GravoesScreen() {
               </Text>
             </View>
 
-            {g.clientes && <Text style={styles.cardMeta}>👥 {g.clientes.nome_fantasia}</Text>}
-            {g.profiles && <Text style={styles.cardMeta}>👤 {g.profiles.nome}</Text>}
-            {g.duracao_min && <Text style={styles.cardMeta}>⏱ {g.duracao_min} min planejados</Text>}
+            {g.clientes && <IconText name="clientes" size={12} color={COLORS.text2} textStyle={styles.cardMeta}>{g.clientes.nome_fantasia}</IconText>}
+            {g.profiles && <IconText name="usuario" size={12} color={COLORS.text2} textStyle={styles.cardMeta}>{g.profiles.nome}</IconText>}
+            {g.duracao_min && <IconText name="prazo" size={12} color={COLORS.text2} textStyle={styles.cardMeta}>{g.duracao_min} min planejados</IconText>}
             {g.descricao && <Text style={styles.cardDesc} numberOfLines={2}>{g.descricao}</Text>}
 
             {/* Roteiro */}
             {g.roteiro && (
               <View style={styles.roteiroBox}>
-                <Text style={styles.roteiroLabel}>📋 Roteiro</Text>
+                <IconText name="list" size={12} color={COLORS.gold} textStyle={styles.roteiroLabel}>Roteiro</IconText>
                 <Text style={styles.roteiroText} numberOfLines={3}>{g.roteiro}</Text>
               </View>
             )}
@@ -146,7 +147,7 @@ export default function GravoesScreen() {
                       {finished ? 'ENCERRADO' : fmtTimer(secs!)}
                     </Text>
                     {pct85 && !finished && (
-                      <Text style={styles.timerAlert}>⚠ Menos de 15% restante!</Text>
+                      <IconText name="alerta" size={12} color={COLORS.danger} textStyle={styles.timerAlert}>Menos de 15% restante!</IconText>
                     )}
                   </View>
                   <TouchableOpacity style={styles.timerStopBtn} onPress={() => stopTimer(g.id)}>

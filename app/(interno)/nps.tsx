@@ -7,6 +7,7 @@ import { COLORS, SPACING, FONT, RADIUS } from '../../src/constants/theme';
 import { supabase } from '../../src/lib/supabase';
 import { useAuthStore } from '../../src/stores/authStore';
 import { Card } from '../../src/components/ui/Card';
+import { IconText } from '../../src/components/ui/Icon';
 
 interface VotoComInfo {
   nota: number;
@@ -189,7 +190,7 @@ export default function NPSScreen() {
                   <Text style={s.votoCliente}>{v.clientes?.nome_fantasia ?? 'Cliente'}</Text>
                   <Text style={[s.votoTipo, { color: notaColor(v.nota) }]}>{notaLabel(v.nota)}</Text>
                 </View>
-                {v.profiles?.nome && <Text style={s.votoFunc}>👤 {v.profiles.nome}</Text>}
+                {v.profiles?.nome && <IconText name="usuario" size={11} color={COLORS.text3} textStyle={s.votoFunc}>{v.profiles.nome}</IconText>}
               </View>
               {v.comentario && <Text style={s.votoComentario}>"{v.comentario}"</Text>}
             </View>

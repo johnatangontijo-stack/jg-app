@@ -9,6 +9,7 @@ import { supabase } from '../../../src/lib/supabase';
 import { Badge } from '../../../src/components/ui/Badge';
 import { ProgressBar } from '../../../src/components/ui/ProgressBar';
 import { Avatar } from '../../../src/components/ui/Avatar';
+import { Icon, type IconName } from '../../../src/components/ui/Icon';
 import { Database } from '../../../src/types/database';
 
 type Cliente = Database['public']['Tables']['clientes']['Row'];
@@ -19,12 +20,12 @@ type Meta = Database['public']['Tables']['metas']['Row'] & { itens: MetaItem[] }
 
 type Aba = 'visao' | 'producoes' | 'metas' | 'trafego' | 'financeiro';
 
-const ABAS: { key: Aba; label: string; emoji: string }[] = [
-  { key: 'visao',     label: 'Visão Geral', emoji: '📊' },
-  { key: 'producoes', label: 'Produções',   emoji: '🎬' },
-  { key: 'metas',     label: 'Metas',       emoji: '🎯' },
-  { key: 'trafego',   label: 'Tráfego',     emoji: '📣' },
-  { key: 'financeiro',label: 'Financeiro',  emoji: '💰' },
+const ABAS: { key: Aba; label: string; icon: IconName }[] = [
+  { key: 'visao',     label: 'Visão Geral', icon: 'dashboard' },
+  { key: 'producoes', label: 'Produções',   icon: 'producoes' },
+  { key: 'metas',     label: 'Metas',       icon: 'metas' },
+  { key: 'trafego',   label: 'Tráfego',     icon: 'trafego' },
+  { key: 'financeiro',label: 'Financeiro',  icon: 'financeiro' },
 ];
 
 function healthColor(score: number) {
@@ -91,7 +92,7 @@ export default function ClientePerfilScreen() {
       {/* Header */}
       <View style={s.header}>
         <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-          <Text style={s.back}>←</Text>
+          <Icon name="back" size={24} color={COLORS.gold} />
         </TouchableOpacity>
         <Avatar name={cliente.nome_fantasia} size={44} />
         <View style={s.headerInfo}>
@@ -120,9 +121,8 @@ export default function ClientePerfilScreen() {
             style={[s.abaChip, aba === a.key && s.abaActive]}
             onPress={() => setAba(a.key)}
           >
-            <Text style={[s.abaText, aba === a.key && s.abaTextActive]}>
-              {a.emoji} {a.label}
-            </Text>
+            <Icon name={a.icon} size={13} color={aba === a.key ? COLORS.black : COLORS.text2} />
+            <Text style={[s.abaText, aba === a.key && s.abaTextActive]}>{a.label}</Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
@@ -158,7 +158,7 @@ function AbaVisao({ cliente }: { cliente: Cliente }) {
       </Section>
 
       <Section title="Campanha">
-        <InfoRow label="Status campanha" value={cliente.campanha_status === 'ativa' ? '✅ Ativa' : '⏸ Pausada'} />
+        <InfoRow label="Status campanha" value={cliente.campanha_status === 'ativa' ? 'Ativa' : 'Pausada'} />
         {cliente.whatsapp_grupo && (
           <InfoRow label="Grupo WhatsApp" value={cliente.whatsapp_grupo} />
         )}
@@ -172,7 +172,7 @@ function AbaVisao({ cliente }: { cliente: Cliente }) {
 // ─────────────────────────────────────────
 function AbaProducoes({ producoes }: { producoes: Producao[] }) {
   if (producoes.length === 0) {
-    return <EmptyState icon="🎬" text="Nenhuma produção cadastrada ainda." />;
+    return <EmptyState icon="producoes" text="Nenhuma produção cadastrada ainda." />;
   }
 
   const porStatus = producoes.reduce<Record<string, number>>((acc, p) => {
@@ -219,7 +219,7 @@ function AbaMetas({ meta }: { meta: Meta | null }) {
   const mes = new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
 
   if (!meta) {
-    return <EmptyState icon="🎯" text={`Nenhuma meta cadastrada para ${mes}.`} />;
+    return <EmptyState icon="metas" text={`Nenhuma meta cadastrada para ${mes}.`} />;
   }
 
   const pct = meta.valor_meta > 0 ? Math.min(100, Math.round((meta.valor_atual / meta.valor_meta) * 100)) : 0;
@@ -251,7 +251,7 @@ function AbaMetas({ meta }: { meta: Meta | null }) {
       </Section>
 
       {/* Metas JG */}
-      <Section title={`✅ Metas JG — ${pctJG}% concluído`}>
+      <Section title={`Metas JG — ${pctJG}% concluído`}>
         {itensJG.length === 0
           ? <Text style={s.semItens}>Nenhum item</Text>
           : itensJG.map(item => <ItemRow key={item.id} item={item} />)
@@ -259,7 +259,7 @@ function AbaMetas({ meta }: { meta: Meta | null }) {
       </Section>
 
       {/* Metas Cliente */}
-      <Section title={`👤 Metas do Cliente — ${pctCliente}% concluído`}>
+      <Section title={`Metas do Cliente — ${pctCliente}% concluído`}>
         {itensCliente.length === 0
           ? <Text style={s.semItens}>Nenhum item</Text>
           : itensCliente.map(item => <ItemRow key={item.id} item={item} />)
@@ -272,9 +272,8 @@ function AbaMetas({ meta }: { meta: Meta | null }) {
 function ItemRow({ item }: { item: MetaItem }) {
   return (
     <View style={s.itemRow}>
-      <Text style={[s.itemCheck, item.concluido && s.itemCheckDone]}>
-        {item.concluido ? '✅' : '⬜'}
-      </Text>
+      <Icon name={item.concluido ? 'aprovado' : 'circle'} size={18}
+        color={item.concluido ? COLORS.success : COLORS.text3} />
       <View style={s.itemBody}>
         <Text style={[s.itemDesc, item.concluido && s.itemDescDone]}>{item.descricao}</Text>
         {item.categoria && <Text style={s.itemCat}>{item.categoria}</Text>}
@@ -296,7 +295,7 @@ function AbaTrafego({ cliente, verbas }: {
       <Section title="Campanha">
         <InfoRow
           label="Status"
-          value={cliente.campanha_status === 'ativa' ? '✅ Campanha ativa' : '⏸ Campanha pausada'}
+          value={cliente.campanha_status === 'ativa' ? 'Campanha ativa' : 'Campanha pausada'}
         />
       </Section>
 
@@ -311,7 +310,7 @@ function AbaTrafego({ cliente, verbas }: {
           )}
         </Section>
       ) : (
-        <EmptyState icon="📣" text="Nenhuma verba cadastrada para este mês." />
+        <EmptyState icon="trafego" text="Nenhuma verba cadastrada para este mês." />
       )}
     </>
   );
@@ -326,7 +325,7 @@ const STATUS_PAG_COLOR: Record<string, string> = {
 
 function AbaFinanceiro({ pagamentos }: { pagamentos: Pagamento[] }) {
   if (pagamentos.length === 0) {
-    return <EmptyState icon="💰" text="Nenhum pagamento registrado ainda." />;
+    return <EmptyState icon="financeiro" text="Nenhum pagamento registrado ainda." />;
   }
 
   const totalPago  = pagamentos.filter(p => p.status === 'pago').reduce((s, p) => s + p.valor, 0);
@@ -395,10 +394,10 @@ function InfoRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-function EmptyState({ icon, text }: { icon: string; text: string }) {
+function EmptyState({ icon, text }: { icon: IconName; text: string }) {
   return (
     <View style={s.emptyState}>
-      <Text style={s.emptyIcon}>{icon}</Text>
+      <Icon name={icon} size={36} color={COLORS.text3} />
       <Text style={s.emptyText}>{text}</Text>
     </View>
   );
@@ -424,7 +423,7 @@ const s = StyleSheet.create({
   // Abas
   abasScroll: { borderBottomWidth: 1, borderBottomColor: COLORS.borderWeak, flexGrow: 0 },
   abasRow: { flexDirection: 'row', gap: SPACING.xs, paddingHorizontal: SPACING.lg, paddingVertical: 8 },
-  abaChip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.full, borderWidth: 1, borderColor: COLORS.borderWeak },
+  abaChip: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 12, paddingVertical: 6, borderRadius: RADIUS.full, borderWidth: 1, borderColor: COLORS.borderWeak },
   abaActive: { backgroundColor: COLORS.gold, borderColor: COLORS.gold },
   abaText: { color: COLORS.text2, fontSize: 11, ...FONT.medium },
   abaTextActive: { color: COLORS.black, ...FONT.bold },

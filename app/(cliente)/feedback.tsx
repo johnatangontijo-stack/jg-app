@@ -6,15 +6,16 @@ import { supabase } from '../../src/lib/supabase';
 import { Card } from '../../src/components/ui/Card';
 import { GoldButton } from '../../src/components/ui/GoldButton';
 import { Badge } from '../../src/components/ui/Badge';
+import { Icon, type IconName } from '../../src/components/ui/Icon';
 import { Database } from '../../src/types/database';
 
 type Feedback = Database['public']['Tables']['feedbacks']['Row'];
 type Tipo = 'elogio' | 'sugestao' | 'reclamacao';
 
-const TIPO_CONFIG: Record<Tipo, { label: string; emoji: string; color: string }> = {
-  elogio: { label: 'Elogio', emoji: '👏', color: COLORS.success },
-  sugestao: { label: 'Sugestão', emoji: '💡', color: COLORS.warning },
-  reclamacao: { label: 'Reclamação', emoji: '⚠️', color: COLORS.danger },
+const TIPO_CONFIG: Record<Tipo, { label: string; icon: IconName; color: string }> = {
+  elogio: { label: 'Elogio', icon: 'elogio', color: COLORS.success },
+  sugestao: { label: 'Sugestão', icon: 'ideia', color: COLORS.warning },
+  reclamacao: { label: 'Reclamação', icon: 'alerta', color: COLORS.danger },
 };
 
 export default function FeedbackScreen() {
@@ -83,7 +84,7 @@ export default function FeedbackScreen() {
                 onPress={() => setTipo(key)}
                 activeOpacity={0.8}
               >
-                <Text style={styles.tipoEmoji}>{cfg.emoji}</Text>
+                <Icon name={cfg.icon} size={24} color={cfg.color} />
                 <Text style={[styles.tipoLabel, { color: cfg.color }]}>{cfg.label}</Text>
               </TouchableOpacity>
             ))}
@@ -113,7 +114,7 @@ export default function FeedbackScreen() {
             return (
               <View key={fb.id} style={[styles.fbCard, { borderLeftColor: cfg.color }]}>
                 <View style={styles.fbHeader}>
-                  <Text style={styles.fbEmoji}>{cfg.emoji}</Text>
+                  <Icon name={cfg.icon} size={18} color={cfg.color} />
                   <Text style={styles.fbData}>{new Date(fb.created_at).toLocaleDateString('pt-BR')}</Text>
                   {fb.respondido && <Badge label="Respondido" variant="success" />}
                 </View>

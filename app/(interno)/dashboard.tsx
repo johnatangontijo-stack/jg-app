@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   ScrollView, View, Text, StyleSheet, ActivityIndicator,
-  RefreshControl, TouchableOpacity, Dimensions,
+  RefreshControl, TouchableOpacity,
 } from 'react-native';
 import { COLORS, SPACING, FONT, RADIUS } from '../../src/constants/theme';
 import { supabase } from '../../src/lib/supabase';
 import { useAuthStore } from '../../src/stores/authStore';
+import { useResponsive } from '../../src/hooks/useResponsive';
+import { Icon, IconText, type IconName } from '../../src/components/ui/Icon';
 import { Badge } from '../../src/components/ui/Badge';
-
-const { width: SCREEN_W } = Dimensions.get('window');
-const IS_WIDE = SCREEN_W > 900;
+import Svg, { Polyline, Polygon, Circle, Text as SvgText } from 'react-native-svg';
 
 // ── helpers ────────────────────────────────────────────────────────────────
 const fmt = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
@@ -33,10 +33,10 @@ function Sparkline({ values, color = COLORS.gold, height = 36, width = 100 }: {
 
   return (
     <View style={{ width, height }}>
-      <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
-        <polyline points={pts} fill="none" stroke={color} strokeWidth="1.8" strokeLinejoin="round" />
-        <polygon points={`0,${height} ${pts} ${width},${height}`} fill={color} fillOpacity="0.12" />
-      </svg>
+      <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+        <Polyline points={pts} fill="none" stroke={color} strokeWidth={1.8} strokeLinejoin="round" />
+        <Polygon points={`0,${height} ${pts} ${width},${height}`} fill={color} fillOpacity={0.12} />
+      </Svg>
     </View>
   );
 }
@@ -48,15 +48,15 @@ function MiniDonut({ pct, color, size = 44 }: { pct: number; color: string; size
   const dash = (pct / 100) * circ;
   return (
     <View style={{ width: size, height: size }}>
-      <svg width={size} height={size}>
-        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={COLORS.surface3} strokeWidth="4" />
-        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth="4"
+      <Svg width={size} height={size}>
+        <Circle cx={size/2} cy={size/2} r={r} fill="none" stroke={COLORS.surface3} strokeWidth={4} />
+        <Circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth={4}
           strokeDasharray={`${dash} ${circ}`} strokeLinecap="round"
           transform={`rotate(-90 ${size/2} ${size/2})`} />
-        <text x={size/2} y={size/2+4} textAnchor="middle" fill={color} fontSize="10" fontWeight="bold">
+        <SvgText x={size/2} y={size/2+4} textAnchor="middle" fill={color} fontSize={10} fontWeight="bold">
           {pct}%
-        </text>
-      </svg>
+        </SvgText>
+      </Svg>
     </View>
   );
 }
@@ -114,6 +114,8 @@ interface DashData {
 // ── Tela principal ─────────────────────────────────────────────────────────
 export default function DashboardScreen() {
   const { profile } = useAuthStore();
+  const { width } = useResponsive();
+  const isWide = width > 900;
   const [data, setData] = useState<DashData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -212,7 +214,8 @@ export default function DashboardScreen() {
   const totalNPS = data.promotores + data.neutros + data.detratores;
 
   return (
-    <ScrollView style={s.container} contentContainerStyle={s.content}
+    <ScrollView style={s.container}
+      contentContainerStyle={[s.content, isWide && s.contentWide]}
       refreshControl={<RefreshControl refreshing={loading} onRefresh={load} tintColor={COLORS.gold} />}
     >
       {/* Header */}
@@ -230,10 +233,10 @@ export default function DashboardScreen() {
       </View>
 
       {/* ── LINHA 1: layout assimétrico ─── */}
-      <View style={[s.row, IS_WIDE && s.rowWide]}>
+      <View style={[s.row, isWide && s.rowWide]}>
 
         {/* Col A — Receita com sparkline */}
-        <View style={[s.colA, IS_WIDE && s.colAWide]}>
+        <View style={[s.colA, isWide && s.colAWide]}>
           <View style={s.receitaCard}>
             <View style={s.receitaTop}>
               <View>
@@ -267,7 +270,7 @@ export default function DashboardScreen() {
         </View>
 
         {/* Col B — 3 cards empilhados */}
-        <View style={[s.colB, IS_WIDE && s.colBWide]}>
+        <View style={[s.colB, isWide && s.colBWide]}>
           {/* Clientes ativos + donut health */}
           <View style={s.miniCard}>
             <View style={{ flex: 1 }}>
@@ -308,13 +311,13 @@ export default function DashboardScreen() {
               <Text style={[s.miniCardVal, { color: data.emRisco > 0 ? COLORS.danger : COLORS.success }]}>
                 {data.emRisco} cliente{data.emRisco !== 1 ? 's' : ''}
               </Text>
-              {data.emRisco > 0 && <Text style={s.piorCliente} numberOfLines={1}>⚠ {data.piorCliente}</Text>}
+              {data.emRisco > 0 && <IconText name="alerta" size={11} color={COLORS.danger} textStyle={s.piorCliente}>{data.piorCliente}</IconText>}
             </View>
           </View>
         </View>
 
         {/* Col C — Alertas */}
-        <View style={[s.colC, IS_WIDE && s.colCWide]}>
+        <View style={[s.colC, isWide && s.colCWide]}>
           <View style={s.alertasCard}>
             <View style={s.alertasHeader}>
               <Text style={s.alertasTitle}>Alertas críticos</Text>
@@ -338,9 +341,9 @@ export default function DashboardScreen() {
       </View>
 
       {/* ── LINHA 2: gráficos Power BI ─── */}
-      <View style={[s.row, IS_WIDE && s.rowWide]}>
+      <View style={[s.row, isWide && s.rowWide]}>
         {/* Setores / segmentos */}
-        <View style={[s.chartCard, IS_WIDE && { flex: 1.2 }]}>
+        <View style={[s.chartCard, isWide && { flex: 1.2 }]}>
           <Text style={s.chartTitle}>Clientes por segmento</Text>
           {data.setores.length > 0
             ? <HBarChart data={data.setores} />
@@ -348,7 +351,7 @@ export default function DashboardScreen() {
         </View>
 
         {/* Financeiro rosca */}
-        <View style={[s.chartCard, IS_WIDE && { flex: 0.9 }]}>
+        <View style={[s.chartCard, isWide && { flex: 0.9 }]}>
           <Text style={s.chartTitle}>Financeiro do mês</Text>
           <View style={s.rosca}>
             <MiniDonut
@@ -368,11 +371,11 @@ export default function DashboardScreen() {
       {/* ── LINHA 3: KPIs rodapé ─── */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         <View style={s.kpiRow}>
-          <KpiCard emoji="🎥" label="Gravações no mês" val={String(data.gravacoesAgendadas)} />
-          <KpiCard emoji="⏳" label="Aguard. aprovação" val={String(data.aguardandoAprovacao)} alert={data.aguardandoAprovacao > 3} />
-          <KpiCard emoji="📅" label="Renov. 30 dias" val={String(data.renovacoes30d)} alert={data.renovacoes30d > 0} />
-          <KpiCard emoji="🔥" label="Clientes em risco" val={String(data.emRisco)} alert={data.emRisco > 0} />
-          <KpiCard emoji="⭐" label="NPS atual" val={String(data.npsScore)} />
+          <KpiCard icon="gravacoes" label="Gravações no mês" val={String(data.gravacoesAgendadas)} />
+          <KpiCard icon="aprovacoes" label="Aguard. aprovação" val={String(data.aguardandoAprovacao)} alert={data.aguardandoAprovacao > 3} />
+          <KpiCard icon="agenda" label="Renov. 30 dias" val={String(data.renovacoes30d)} alert={data.renovacoes30d > 0} />
+          <KpiCard icon="clientes" label="Clientes em risco" val={String(data.emRisco)} alert={data.emRisco > 0} />
+          <KpiCard icon="nps" label="NPS atual" val={String(data.npsScore)} />
         </View>
       </ScrollView>
     </ScrollView>
@@ -390,10 +393,10 @@ function LegendaItem({ cor, label, val }: { cor: string; label: string; val: str
   );
 }
 
-function KpiCard({ emoji, label, val, alert }: { emoji: string; label: string; val: string; alert?: boolean }) {
+function KpiCard({ icon, label, val, alert }: { icon: IconName; label: string; val: string; alert?: boolean }) {
   return (
     <View style={[s.kpiCard, alert && s.kpiCardAlert]}>
-      <Text style={s.kpiEmoji}>{emoji}</Text>
+      <Icon name={icon} size={20} color={alert ? COLORS.warning : COLORS.gold} />
       <Text style={[s.kpiVal, alert && { color: COLORS.warning }]}>{val}</Text>
       <Text style={s.kpiLabel}>{label}</Text>
     </View>
@@ -404,6 +407,7 @@ function KpiCard({ emoji, label, val, alert }: { emoji: string; label: string; v
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.black },
   content: { padding: SPACING.lg, gap: SPACING.lg, paddingBottom: 48 },
+  contentWide: { maxWidth: 1280, alignSelf: 'center', width: '100%' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: COLORS.black, gap: SPACING.md },
   loadingText: { color: COLORS.text3, fontSize: 13 },
   pageHeader: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' },
@@ -466,7 +470,6 @@ const s = StyleSheet.create({
   kpiRow: { flexDirection: 'row', gap: SPACING.sm, paddingBottom: SPACING.xs },
   kpiCard: { backgroundColor: COLORS.surface1, borderRadius: RADIUS.lg, padding: SPACING.md, borderWidth: 1, borderColor: COLORS.border, alignItems: 'center', gap: 4, minWidth: 120 },
   kpiCardAlert: { borderColor: COLORS.warning + '66' },
-  kpiEmoji: { fontSize: 20 },
   kpiVal: { color: COLORS.gold, fontSize: 20, ...FONT.bold },
   kpiLabel: { color: COLORS.text3, fontSize: 10, textAlign: 'center' },
 });

@@ -7,6 +7,7 @@ import { COLORS, SPACING, FONT, RADIUS } from '../../src/constants/theme';
 import { supabase } from '../../src/lib/supabase';
 import { ProgressBar } from '../../src/components/ui/ProgressBar';
 import { GoldButton } from '../../src/components/ui/GoldButton';
+import { Icon, IconText } from '../../src/components/ui/Icon';
 
 type Cliente = { id: string; nome_fantasia: string };
 type Meta = {
@@ -244,7 +245,7 @@ export default function MetasInternoScreen() {
       <Modal visible={modalMeta} transparent animationType="fade" onRequestClose={() => setModalMeta(false)}>
         <View style={s.overlay}>
           <View style={s.modal}>
-            <Text style={s.modalTitle}>🎯 Meta — {mesSel}</Text>
+            <IconText name="metas" size={16} color={COLORS.gold} textStyle={s.modalTitle}>Meta — {mesSel}</IconText>
             <Text style={s.modalLabel}>Valor da meta (R$) *</Text>
             <TextInput style={s.modalInput} value={formMeta.valor_meta} onChangeText={v => setFormMeta(f => ({ ...f, valor_meta: v }))}
               placeholder="Ex: 50000" placeholderTextColor={COLORS.text3} keyboardType="decimal-pad" />
@@ -267,7 +268,7 @@ export default function MetasInternoScreen() {
       <Modal visible={modalItem} transparent animationType="fade" onRequestClose={() => setModalItem(false)}>
         <View style={s.overlay}>
           <View style={s.modal}>
-            <Text style={s.modalTitle}>📋 Novo Item</Text>
+            <IconText name="list" size={16} color={COLORS.gold} textStyle={s.modalTitle}>Novo Item</IconText>
             <Text style={s.modalLabel}>Descrição *</Text>
             <TextInput style={s.modalInput} value={formItem.descricao} onChangeText={v => setFormItem(f => ({ ...f, descricao: v }))}
               placeholder="Ex: Criar 8 posts para Instagram..." placeholderTextColor={COLORS.text3} />
@@ -276,9 +277,11 @@ export default function MetasInternoScreen() {
               {(['jg', 'cliente'] as const).map(r => (
                 <TouchableOpacity key={r} style={[s.respBtn, formItem.responsavel === r && s.respBtnActive]}
                   onPress={() => setFormItem(f => ({ ...f, responsavel: r }))}>
-                  <Text style={[s.respBtnText, formItem.responsavel === r && { color: COLORS.gold }]}>
-                    {r === 'jg' ? '🏢 JG Gontijo' : '👤 Cliente'}
-                  </Text>
+                  <IconText name={r === 'jg' ? 'empresa' : 'usuario'} size={13}
+                    color={formItem.responsavel === r ? COLORS.gold : COLORS.text2}
+                    textStyle={[s.respBtnText, formItem.responsavel === r && { color: COLORS.gold }]}>
+                    {r === 'jg' ? 'JG Gontijo' : 'Cliente'}
+                  </IconText>
                 </TouchableOpacity>
               ))}
             </View>
@@ -308,10 +311,10 @@ function ItemRow({ item, onToggle, onDelete }: { item: MetaItem; onToggle: () =>
       <View style={{ flex: 1 }}>
         <Text style={[s.itemDesc, item.concluido && s.itemDescDone]}>{item.descricao}</Text>
         {item.categoria && <Text style={s.itemCat}>{item.categoria}</Text>}
-        {item.prazo && <Text style={s.itemPrazo}>📅 {new Date(item.prazo + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}</Text>}
+        {item.prazo && <IconText name="agenda" size={11} color={COLORS.text3} textStyle={s.itemPrazo}>{new Date(item.prazo + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}</IconText>}
       </View>
       <TouchableOpacity onPress={onDelete} style={s.deleteBtn}>
-        <Text style={s.deleteBtnText}>✕</Text>
+        <Icon name="close" size={16} color={COLORS.text3} />
       </TouchableOpacity>
     </View>
   );

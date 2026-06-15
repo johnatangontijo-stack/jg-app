@@ -5,6 +5,7 @@ import { useAuthStore } from '../../src/stores/authStore';
 import { supabase } from '../../src/lib/supabase';
 import { Card } from '../../src/components/ui/Card';
 import { Badge } from '../../src/components/ui/Badge';
+import { IconText } from '../../src/components/ui/Icon';
 import { Database } from '../../src/types/database';
 
 type Slot = Database['public']['Tables']['agenda_otimizacao']['Row'];
@@ -52,7 +53,7 @@ export default function AgendaClienteScreen() {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Card style={styles.infoCard}>
-        <Text style={styles.infoTitle}>📅 Transparência total</Text>
+        <IconText name="agenda" size={15} color={COLORS.gold} textStyle={styles.infoTitle}>Transparência total</IconText>
         <Text style={styles.infoText}>
           Aqui você acompanha com antecedência quando seu gestor estará otimizando suas campanhas.
         </Text>

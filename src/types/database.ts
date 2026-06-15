@@ -171,6 +171,8 @@ export type Database = {
           whatsapp_grupo: string | null
           gestor_id: string | null
           logo_url: string | null
+          nicho: string | null
+          ramo: string | null
           created_at: string
           updated_at: string
         }
@@ -189,6 +191,8 @@ export type Database = {
           whatsapp_grupo?: string | null
           gestor_id?: string | null
           logo_url?: string | null
+          nicho?: string | null
+          ramo?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -207,8 +211,52 @@ export type Database = {
           whatsapp_grupo?: string | null
           gestor_id?: string | null
           logo_url?: string | null
+          nicho?: string | null
+          ramo?: string | null
           created_at?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      networking_interesses: {
+        Row: {
+          id: string
+          cliente_id: string
+          setor: string
+          descricao: string | null
+          status: 'pendente' | 'em_contato' | 'conectado' | 'cancelado'
+          created_at: string
+          atualizado_em: string | null
+        }
+        Insert: {
+          id?: string
+          cliente_id: string
+          setor: string
+          descricao?: string | null
+          status?: 'pendente' | 'em_contato' | 'conectado' | 'cancelado'
+          created_at?: string
+          atualizado_em?: string | null
+        }
+        Update: {
+          id?: string
+          cliente_id?: string
+          setor?: string
+          descricao?: string | null
+          status?: 'pendente' | 'em_contato' | 'conectado' | 'cancelado'
+          created_at?: string
+          atualizado_em?: string | null
+        }
+        Relationships: []
+      }
+      networking_setores_disponiveis: {
+        Row: {
+          nicho: string | null
+        }
+        Insert: {
+          nicho?: string | null
+        }
+        Update: {
+          nicho?: string | null
         }
         Relationships: []
       }

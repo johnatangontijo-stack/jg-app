@@ -9,6 +9,7 @@ import { supabase } from '../../src/lib/supabase';
 import { useAuthStore } from '../../src/stores/authStore';
 import { Badge } from '../../src/components/ui/Badge';
 import { GoldButton } from '../../src/components/ui/GoldButton';
+import { Icon, IconText } from '../../src/components/ui/Icon';
 
 type Feedback = {
   id: string;
@@ -149,7 +150,7 @@ export default function FeedbacksScreen() {
       <Modal visible={!!designandoFb} transparent animationType="fade" onRequestClose={() => setDesignandoFb(null)}>
         <View style={s.modalOverlay}>
           <View style={s.modalBox}>
-            <Text style={s.modalTitle}>✈️ Designar para</Text>
+            <IconText name="send" size={16} color={COLORS.gold} textStyle={s.modalTitle}>Designar para</IconText>
             <Text style={s.modalSub} numberOfLines={2}>
               {designandoFb?.clientes?.nome_fantasia}: {designandoFb?.mensagem.substring(0, 60)}...
             </Text>
@@ -197,12 +198,12 @@ function FbCard({ fb, resposta, onRespostaChange, onResponder, onDesignar, sendi
         <Text style={s.fbData}>{new Date(fb.created_at).toLocaleDateString('pt-BR')}</Text>
         <Badge label={fb.tipo} variant={fb.tipo === 'elogio' ? 'success' : fb.tipo === 'sugestao' ? 'warning' : 'danger'} />
         <TouchableOpacity onPress={onDesignar} style={s.aviaoBtn}>
-          <Text style={s.aviaoText}>✈️</Text>
+          <Icon name="send" size={16} color={COLORS.gold} />
         </TouchableOpacity>
       </View>
 
       {fb.designado_para && (
-        <Text style={s.designadoPara}>👤 Designado: {(fb.designado_para as any).nome}</Text>
+        <IconText name="usuario" size={12} color={COLORS.text2} textStyle={s.designadoPara}>Designado: {(fb.designado_para as any).nome}</IconText>
       )}
 
       <Text style={s.fbMsg}>{fb.mensagem}</Text>

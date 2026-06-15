@@ -6,6 +6,8 @@ import {
 import { COLORS, SPACING, FONT, RADIUS } from '../../src/constants/theme';
 import { supabase } from '../../src/lib/supabase';
 import { useAuthStore } from '../../src/stores/authStore';
+import { Icon, IconText, type IconName } from '../../src/components/ui/Icon';
+import { setorIcon } from '../../src/constants/setores';
 
 type Interesse = {
   id: string;
@@ -15,31 +17,11 @@ type Interesse = {
   created_at: string;
 };
 
-const SETOR_EMOJI: Record<string, string> = {
-  'E-commerce': '🛒',
-  'Saúde': '🏥',
-  'Moda': '👗',
-  'Construção Civil': '🏗️',
-  'Automotivo': '🚗',
-  'Alimentação': '🍽️',
-  'Educação': '📚',
-  'Tecnologia': '💻',
-  'Beleza': '💄',
-  'Fitness': '💪',
-  'Imobiliário': '🏠',
-  'Jurídico': '⚖️',
-  'Financeiro': '💰',
-};
-
-function getEmoji(setor: string) {
-  return SETOR_EMOJI[setor] ?? '🤝';
-}
-
 const STATUS_INFO = {
-  pendente:    { label: 'Aguardando JG', color: COLORS.warning,  emoji: '⏳' },
-  em_contato:  { label: 'Em contato',    color: '#8b5cf6',        emoji: '📞' },
-  conectado:   { label: 'Conectado!',    color: COLORS.success,   emoji: '✅' },
-  cancelado:   { label: 'Cancelado',     color: COLORS.text3,     emoji: '✕' },
+  pendente:    { label: 'Aguardando JG', color: COLORS.warning,  icon: 'aguardando' as IconName },
+  em_contato:  { label: 'Em contato',    color: '#8b5cf6',        icon: 'emContato'  as IconName },
+  conectado:   { label: 'Conectado!',    color: COLORS.success,   icon: 'conectado'  as IconName },
+  cancelado:   { label: 'Cancelado',     color: COLORS.text3,     icon: 'close'      as IconName },
 };
 
 export default function NetworkingClienteScreen() {
@@ -141,7 +123,9 @@ export default function NetworkingClienteScreen() {
       >
         {/* Header */}
         <View style={s.headerBox}>
-          <Text style={s.headerTitle}>🤝 Networking JG</Text>
+          <IconText name="networking" size={18} color={COLORS.gold} textStyle={s.headerTitle}>
+            Networking JG
+          </IconText>
           <Text style={s.headerSub}>
             Conheça os setores que atendemos e solicite uma conexão estratégica. Nossa equipe fará a ponte com discrição.
           </Text>
@@ -151,7 +135,9 @@ export default function NetworkingClienteScreen() {
         {meuNicho && (
           <View style={s.meuNichoBox}>
             <Text style={s.meuNichoLabel}>Seu setor na rede JG</Text>
-            <Text style={s.meuNichoVal}>{getEmoji(meuNicho)} {meuNicho}</Text>
+            <IconText name={setorIcon(meuNicho)} size={15} color={COLORS.gold} textStyle={s.meuNichoVal}>
+              {meuNicho}
+            </IconText>
           </View>
         )}
 
@@ -171,13 +157,15 @@ export default function NetworkingClienteScreen() {
           return (
             <View key={setor} style={[s.card, interesse && { borderLeftColor: info!.color, borderLeftWidth: 4 }]}>
               <View style={s.cardLeft}>
-                <Text style={s.cardEmoji}>{getEmoji(setor)}</Text>
+                <View style={s.cardEmoji}>
+                  <Icon name={setorIcon(setor)} size={22} color={COLORS.gold} />
+                </View>
                 <View>
                   <Text style={s.cardSetor}>{setor}</Text>
                   {interesse && (
-                    <Text style={[s.cardStatus, { color: info!.color }]}>
-                      {info!.emoji} {info!.label}
-                    </Text>
+                    <IconText name={info!.icon} size={12} color={info!.color} textStyle={[s.cardStatus, { color: info!.color }]}>
+                      {info!.label}
+                    </IconText>
                   )}
                   {interesse?.descricao && (
                     <Text style={s.cardDesc} numberOfLines={1}>"{interesse.descricao}"</Text>
@@ -195,7 +183,7 @@ export default function NetworkingClienteScreen() {
                 </TouchableOpacity>
               ) : (
                 <View style={[s.statusBadge, { backgroundColor: info!.color + '22' }]}>
-                  <Text style={[s.statusBadgeText, { color: info!.color }]}>{info!.emoji}</Text>
+                  <Icon name={info!.icon} size={16} color={info!.color} />
                 </View>
               )}
             </View>
@@ -210,10 +198,14 @@ export default function NetworkingClienteScreen() {
               const info = STATUS_INFO[i.status];
               return (
                 <View key={i.id} style={s.minhaRow}>
-                  <Text style={s.minhaEmoji}>{getEmoji(i.setor)}</Text>
+                  <View style={s.minhaEmoji}>
+                    <Icon name={setorIcon(i.setor)} size={18} color={COLORS.gold} />
+                  </View>
                   <View style={{ flex: 1 }}>
                     <Text style={s.minhaSetor}>{i.setor}</Text>
-                    <Text style={[s.minhaStatus, { color: info.color }]}>{info.emoji} {info.label}</Text>
+                    <IconText name={info.icon} size={12} color={info.color} textStyle={[s.minhaStatus, { color: info.color }]}>
+                      {info.label}
+                    </IconText>
                   </View>
                   <Text style={s.minhaData}>
                     {new Date(i.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
@@ -225,9 +217,9 @@ export default function NetworkingClienteScreen() {
         )}
 
         <View style={s.footer}>
-          <Text style={s.footerText}>
-            🔒 Sua identidade e a dos outros clientes são preservadas. A JG Gontijo cuida de cada conexão com responsabilidade.
-          </Text>
+          <IconText name="lock" size={13} color={COLORS.text3} textStyle={s.footerText} style={{ alignItems: 'flex-start' }}>
+            Sua identidade e a dos outros clientes são preservadas. A JG Gontijo cuida de cada conexão com responsabilidade.
+          </IconText>
         </View>
       </ScrollView>
 
@@ -235,7 +227,9 @@ export default function NetworkingClienteScreen() {
       <Modal visible={!!modalSetor} transparent animationType="fade" onRequestClose={() => setModalSetor(null)}>
         <View style={s.overlay}>
           <View style={s.modal}>
-            <Text style={s.modalTitle}>{getEmoji(modalSetor ?? '')} {modalSetor}</Text>
+            <IconText name={setorIcon(modalSetor)} size={18} color={COLORS.gold} textStyle={s.modalTitle}>
+              {modalSetor}
+            </IconText>
             <Text style={s.modalSub}>
               Você está solicitando uma conexão com uma empresa do setor <Text style={{ color: COLORS.gold }}>{modalSetor}</Text>. Nossa equipe entrará em contato para fazer a ponte.
             </Text>
@@ -258,7 +252,9 @@ export default function NetworkingClienteScreen() {
             >
               {saving
                 ? <ActivityIndicator color={COLORS.black} size="small" />
-                : <Text style={s.confirmarBtnText}>✅ Enviar Solicitação</Text>
+                : <IconText name="conectado" size={15} color={COLORS.black} textStyle={s.confirmarBtnText}>
+                    Enviar Solicitação
+                  </IconText>
               }
             </TouchableOpacity>
             <TouchableOpacity style={s.cancelBtn} onPress={() => setModalSetor(null)}>
@@ -286,21 +282,20 @@ const s = StyleSheet.create({
   emptyText: { color: COLORS.text3, fontSize: 13 },
   card: { backgroundColor: COLORS.surface2, borderRadius: RADIUS.lg, padding: SPACING.md, borderWidth: 1, borderColor: COLORS.borderWeak, flexDirection: 'row', alignItems: 'center', gap: SPACING.md },
   cardLeft: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: SPACING.md },
-  cardEmoji: { fontSize: 28 },
+  cardEmoji: { width: 42, height: 42, borderRadius: RADIUS.full, backgroundColor: 'rgba(201,168,76,0.10)', borderWidth: 1, borderColor: COLORS.border, alignItems: 'center', justifyContent: 'center' },
   cardSetor: { color: COLORS.text, fontSize: 14, ...FONT.bold },
   cardStatus: { fontSize: 12, marginTop: 2 },
   cardDesc: { color: COLORS.text3, fontSize: 11, fontStyle: 'italic', marginTop: 2 },
   solicitarBtn: { backgroundColor: 'rgba(201,168,76,0.12)', borderRadius: RADIUS.md, paddingHorizontal: SPACING.md, paddingVertical: SPACING.sm, borderWidth: 1, borderColor: COLORS.gold },
   solicitarBtnText: { color: COLORS.gold, fontSize: 12, ...FONT.medium },
   statusBadge: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
-  statusBadgeText: { fontSize: 16 },
   minhaRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md, backgroundColor: COLORS.surface1, borderRadius: RADIUS.md, padding: SPACING.md, borderWidth: 1, borderColor: COLORS.border },
-  minhaEmoji: { fontSize: 22 },
+  minhaEmoji: { width: 36, height: 36, borderRadius: RADIUS.full, backgroundColor: 'rgba(201,168,76,0.10)', borderWidth: 1, borderColor: COLORS.border, alignItems: 'center', justifyContent: 'center' },
   minhaSetor: { color: COLORS.text, fontSize: 13, ...FONT.medium },
   minhaStatus: { fontSize: 12, marginTop: 2 },
   minhaData: { color: COLORS.text3, fontSize: 11 },
   footer: { backgroundColor: COLORS.surface1, borderRadius: RADIUS.md, padding: SPACING.md, marginTop: SPACING.sm },
-  footerText: { color: COLORS.text3, fontSize: 12, lineHeight: 17 },
+  footerText: { color: COLORS.text3, fontSize: 12, lineHeight: 17, flex: 1 },
   // Modal
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.75)', justifyContent: 'center', alignItems: 'center', padding: SPACING.lg },
   modal: { backgroundColor: COLORS.surface1, borderRadius: RADIUS.lg, padding: SPACING.lg, width: '100%', maxWidth: 420, gap: SPACING.sm, borderWidth: 1, borderColor: COLORS.border },
