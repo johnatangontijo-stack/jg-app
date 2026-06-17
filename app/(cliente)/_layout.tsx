@@ -1,10 +1,12 @@
 import React, { useEffect } from 'react';
+import { View } from 'react-native';
 import { Tabs } from 'expo-router';
 import { COLORS, FONT } from '../../src/constants/theme';
 import { useNotificacoesStore } from '../../src/stores/notificacoesStore';
 import { useAuthStore } from '../../src/stores/authStore';
 import { ResponsiveTabBar } from '../../src/components/ui/ResponsiveTabBar';
 import { HeaderBell } from '../../src/components/ui/HeaderBell';
+import { HeaderLogout } from '../../src/components/ui/HeaderLogout';
 import { CLIENTE_MENU } from '../../src/constants/nav';
 
 export default function ClienteLayout() {
@@ -27,7 +29,12 @@ export default function ClienteLayout() {
         headerStyle: { backgroundColor: COLORS.surface1 },
         headerTintColor: COLORS.text,
         headerTitleStyle: { ...FONT.bold, color: COLORS.text },
-        headerRight: () => <HeaderBell />,
+        headerRight: () => (
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <HeaderBell />
+            <HeaderLogout />
+          </View>
+        ),
       }}
     >
       <Tabs.Screen name="index"      options={{ title: 'Início' }} />
