@@ -23,6 +23,20 @@ const PLATAFORMA_ICON: Record<string, IconName> = {
   instagram: 'instagram', facebook: 'facebook', linkedin: 'linkedin', tiktok: 'tiktok', youtube: 'youtube',
 };
 
+/** conteudo pode vir como link string (drive/url) ou objeto {url, nome_arquivo}. */
+function fileFrom(conteudo: unknown): { url: string; nome: string } | null {
+  if (!conteudo) return null;
+  if (typeof conteudo === 'string') {
+    const u = conteudo.trim();
+    return u ? { url: u, nome: 'Ver peça' } : null;
+  }
+  if (typeof conteudo === 'object') {
+    const c = conteudo as { url?: string; nome_arquivo?: string };
+    return c.url ? { url: c.url, nome: c.nome_arquivo ?? 'Ver peça' } : null;
+  }
+  return null;
+}
+
 const SUPABASE_FUNCTIONS_URL = 'https://ieekdxxmhkbslskgxbdg.supabase.co/functions/v1';
 
 export default function AprovacoesClienteScreen() {
@@ -172,7 +186,7 @@ export default function AprovacoesClienteScreen() {
         {listaFiltrada.map(apr => {
           const info = STATUS_INFO[apr.status] ?? STATUS_INFO.aguardando_aprovacao;
           const prazoExpired = apr.prazo_resposta && new Date(apr.prazo_resposta) < new Date() && apr.status === 'aguardando_aprovacao';
-          const conteudo = apr.conteudo as any;
+          const file = fileFrom(apr.conteudo);
 
           return (
             <TouchableOpacity
@@ -227,9 +241,9 @@ export default function AprovacoesClienteScreen() {
               )}
 
               {/* Arquivo */}
-              {conteudo?.url && (
+              {file && (
                 <IconText name="arquivo" size={12} color={COLORS.gold} textStyle={s.arquivo}>
-                  {conteudo.nome_arquivo ?? 'Ver arquivo'}
+                  {file.nome}
                 </IconText>
               )}
 
@@ -277,18 +291,19 @@ export default function AprovacoesClienteScreen() {
               )}
 
               {/* Arquivo / Link */}
-              {(selected.conteudo as any)?.url && (
-                <TouchableOpacity
-                  style={s.linkBtn}
-                  onPress={() => Linking.openURL((selected.conteudo as any).url)}
-                >
-                  <IconText name={selected.tipo_conteudo === 'video' ? 'video' : 'imagem'} size={15}
-                    color={COLORS.gold} textStyle={s.linkBtnText}>
-                    Abrir {(selected.conteudo as any).nome_arquivo ?? 'arquivo'}
-                  </IconText>
-                  <Text style={s.linkBtnHint}>Toque para visualizar a peça</Text>
-                </TouchableOpacity>
-              )}
+              {(() => {
+                const file = fileFrom(selected.conteudo);
+                if (!file) return null;
+                return (
+                  <TouchableOpacity style={s.linkBtn} onPress={() => Linking.openURL(file.url)}>
+                    <IconText name={selected.tipo_conteudo === 'video' ? 'video' : 'imagem'} size={15}
+                      color={COLORS.gold} textStyle={s.linkBtnText}>
+                      Abrir {file.nome}
+                    </IconText>
+                    <Text style={s.linkBtnHint}>Toque para visualizar a peça</Text>
+                  </TouchableOpacity>
+                );
+              })()}
 
               {/* Descrição */}
               {selected.descricao_post && (
