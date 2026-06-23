@@ -80,22 +80,27 @@ serve(async (req: Request) => {
     });
   }
 
-  // Dispara callback para JG Interno (se configurado)
+  // Dispara callback para JG Interno (se configurado).
+  // Contrato do sm-callback (JG Interno): auth via header x-jg-secret,
+  // body { action:'approval_response', approval_id, status, feedback }.
+  // 'revisao' (app) → 'revisao_solicitada' (JG Interno).
   if (apr.callback_url) {
+    const statusMap: Record<string, string> = {
+      aprovado: 'aprovado', reprovado: 'reprovado', revisao: 'revisao_solicitada',
+    };
     try {
       await fetch(apr.callback_url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apr.callback_token ?? ''}`,
+          'x-jg-secret': apr.callback_token ?? '',
         },
         body: JSON.stringify({
-          evento:       'resposta_aprovacao',
-          aprovacao_id: aprovacao_id,
-          status:       resposta,
-          comentario:   comentario ?? null,
-          respondido_em: new Date().toISOString(),
-          cliente_nome:  apr.cliente_nome,
+          action:      'approval_response',
+          approval_id: aprovacao_id,
+          status:      statusMap[resposta] ?? resposta,
+          feedback:    comentario ?? null,
+          token:       apr.callback_token ?? undefined, // fallback de auth aceito pelo sm-callback
         }),
       });
     } catch (e) {
