@@ -9,12 +9,13 @@ import {
   Platform,
   ScrollView,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import * as LocalAuthentication from 'expo-local-authentication';
 import * as SecureStore from 'expo-secure-store';
 import { useAuthStore } from '../../src/stores/authStore';
 import { Icon } from '../../src/components/ui/Icon';
-import { COLORS, RADIUS, SPACING, FONT } from '../../src/constants/theme';
+import { COLORS, SPACING, FONT } from '../../src/constants/theme';
 import { GoldButton } from '../../src/components/ui/GoldButton';
 
 export default function LoginScreen() {
@@ -76,9 +77,11 @@ export default function LoginScreen() {
       <ScrollView contentContainerStyle={styles.inner} keyboardShouldPersistTaps="handled">
         {/* Logo */}
         <View style={styles.logoArea}>
-          <View style={styles.logoRing}>
-            <Text style={styles.logoText}>JG</Text>
-          </View>
+          <Image
+            source={require('../../assets/logo-jg.png')}
+            style={styles.logoImg}
+            resizeMode="contain"
+          />
           <Text style={styles.brandName}>JG App</Text>
           <Text style={styles.brandSub}>Joni Gontijo Gestão T.P.</Text>
         </View>
@@ -159,20 +162,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: SPACING.sm,
   },
-  logoRing: {
-    width: 80,
-    height: 80,
-    borderRadius: RADIUS.full,
-    borderWidth: 2,
-    borderColor: COLORS.gold,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(201,168,76,0.08)',
-  },
-  logoText: {
-    fontSize: 28,
-    color: COLORS.gold,
-    ...FONT.bold,
+  logoImg: {
+    width: 180,
+    height: 103,
   },
   brandName: {
     fontSize: 24,
