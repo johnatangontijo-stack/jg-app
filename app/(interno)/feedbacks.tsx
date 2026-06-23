@@ -33,7 +33,9 @@ const TIPO_COLOR: Record<string, string> = {
   reclamacao: COLORS.danger,
 };
 
-const ROLES_ACESSO = ['admin', 'gerencia', 'head', 'financeiro'];
+// Alinhado ao RLS is_gerencia() (admin/gerencia veem feedbacks). head/financeiro
+// abriam a tela mas o RLS retornava vazio — removidos p/ não confundir.
+const ROLES_ACESSO = ['admin', 'gerencia'];
 
 export default function FeedbacksScreen() {
   const { profile } = useAuthStore();
