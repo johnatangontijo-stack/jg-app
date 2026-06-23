@@ -1,7 +1,7 @@
 // Service worker do JG App (PWA).
 // Estratégia network-first p/ navegação (evita servir bundle velho),
 // com fallback de cache p/ offline. Assets ganham cache runtime.
-const CACHE = 'jg-app-v3';
+const CACHE = 'jg-app-v4';
 const OFFLINE_FALLBACK = '/';
 
 self.addEventListener('install', (event) => {
