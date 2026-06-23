@@ -15,7 +15,7 @@ import * as LocalAuthentication from 'expo-local-authentication';
 import * as SecureStore from 'expo-secure-store';
 import { useAuthStore } from '../../src/stores/authStore';
 import { Icon } from '../../src/components/ui/Icon';
-import { COLORS, SPACING, FONT } from '../../src/constants/theme';
+import { COLORS, RADIUS, SPACING, FONT } from '../../src/constants/theme';
 import { GoldButton } from '../../src/components/ui/GoldButton';
 
 export default function LoginScreen() {
