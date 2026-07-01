@@ -7,7 +7,11 @@
 // Deploy: supabase functions deploy provisionar-cliente --no-verify-jwt
 // Auth: Authorization: Bearer <EVENTOS_API_SECRET>  (mesmo segredo da integração)
 //
-// Body: { nome, email, whatsapp?, senha? }
+// Body: { nome, email?, whatsapp?, senha? }  — email OU whatsapp obrigatório.
+//   Se faltar email, gera um sintético (slug-hash@nexus.internal) só p/ satisfazer
+//   o requisito técnico do Supabase Auth (profiles.email é NOT NULL). Não é um
+//   e-mail real usado — login/recuperação de senha desse cliente precisa passar
+//   pelo gestor (reprovisionamento), não por "esqueci minha senha".
 // Retorna: { cliente_id, profile_id, criou_login, senha_temporaria? }
 // ============================================================
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
@@ -19,6 +23,33 @@ const CORS = {
   'Content-Type': 'application/json',
 };
 const j = (b: unknown, s = 200) => new Response(JSON.stringify(b), { status: s, headers: CORS });
+
+// Slug simples: minúsculas, sem acento, espaços viram hífen, remove especiais.
+function slug(s: string): string {
+  return s
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+// Hash curto determinístico (não criptográfico — só p/ unicidade, não segurança).
+function hashCurto(seed: string): string {
+  let h = 5381;
+  for (let i = 0; i < seed.length; i++) h = ((h << 5) + h + seed.charCodeAt(i)) >>> 0;
+  return h.toString(36);
+}
+
+// E-mail sintético determinístico p/ clientes sem e-mail real.
+// Seed = whatsapp completo (não só o nome) pra não colidir entre clientes com nome parecido;
+// cai pra nome+timestamp só se whatsapp vier vazio/em branco (não deveria acontecer — validado antes).
+function gerarEmailSintetico(nome: string, whatsapp: string | null): string {
+  const seed = (whatsapp && whatsapp.trim()) ? whatsapp.trim() : `${nome}-${Date.now()}`;
+  return `${slug(nome)}-${hashCurto(seed)}@nexus.internal`;
+}
 
 function senhaForte(): string {
   // 12 chars: maiúscula, minúscula, dígito e símbolo garantidos.
@@ -43,10 +74,14 @@ serve(async (req: Request) => {
   try { body = await req.json(); } catch { return j({ erro: 'JSON inválido' }, 400); }
 
   const nome = String(body.nome ?? '').trim();
-  const email = String(body.email ?? '').trim().toLowerCase();
+  const emailInformado = String(body.email ?? '').trim().toLowerCase();
   const whatsapp = body.whatsapp ? String(body.whatsapp) : null;
   if (!nome) return j({ erro: 'nome obrigatório' }, 400);
-  if (!email || !email.includes('@')) return j({ erro: 'email válido obrigatório' }, 400);
+  if (emailInformado && !emailInformado.includes('@')) return j({ erro: 'email inválido' }, 400);
+  if (!emailInformado && !whatsapp) return j({ erro: 'email ou whatsapp obrigatório' }, 400);
+
+  // Sem e-mail real → gera sintético (só p/ satisfazer o requisito técnico do Supabase Auth).
+  const email = emailInformado || gerarEmailSintetico(nome, whatsapp);
 
   const db = createClient(
     Deno.env.get('SUPABASE_URL') ?? '',
