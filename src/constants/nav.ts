@@ -39,6 +39,7 @@ export const INTERNO_MENU: NavItem[] = [
   { name: 'financeiro',      route: '/(interno)/financeiro',    title: 'Financeiro', icon: 'financeiro', roles: ['admin', 'financeiro'] },
   { name: 'networking',      route: '/(interno)/networking',    title: 'Networking', icon: 'networking', roles: ['admin', 'gerencia', 'head'] },
   { name: 'equipe/index',    route: '/(interno)/equipe',        title: 'Equipe',     icon: 'equipe',     roles: ['admin', 'gerencia'] },
+  { name: 'gestao',          route: '/(interno)/gestao',         title: 'Gestão',     icon: 'gestao',     roles: ['admin', 'gerencia'] },
 ];
 
 // ── Menu do cliente ──────────────────────────────────────────────────────────

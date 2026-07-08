@@ -43,6 +43,7 @@ export default function InternoLayout() {
       <Tabs.Screen name="financeiro"      options={{ title: 'Financeiro' }} />
       <Tabs.Screen name="networking"      options={{ title: 'Networking' }} />
       <Tabs.Screen name="equipe/index"    options={{ title: 'Equipe' }} />
+      <Tabs.Screen name="gestao"           options={{ title: 'Gestão' }} />
 
       {/* rotas internas sem botão na barra */}
       <Tabs.Screen name="clientes/[id]"   options={{ title: 'Cliente' }} />

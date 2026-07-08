@@ -20,6 +20,7 @@ const MAP = {
   metas:      'flag',
   networking: 'git-network',
   equipe:     'person',
+  gestao:     'swap-horizontal',
   // cliente
   inicio:     'home',
   trafego:    'bar-chart',
